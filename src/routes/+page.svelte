@@ -1,2 +1,17 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import TextBox from '$components/TextBox.svelte';
+</script>
+
+<p style="text-3xl font-bold underline">hi</p>
+<TextBox></TextBox>
+
+<style>
+	@reference "tailwindcss/theme";
+	:global(html) {
+		background-color: theme(--color-gray-100);
+	}
+
+	@tailwind base;
+	@tailwind components;
+	@tailwind utilities;
+</style>
