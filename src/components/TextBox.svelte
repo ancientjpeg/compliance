@@ -1,7 +1,5 @@
 <script lang="ts">
-	/* let { text = $bindable(), ...props } = $props(); */
+	let { text = $bindable(), class: className = '', ...props } = $props();
 </script>
 
-<div>
-	<input />
-</div>
+<input class={`${className}`} value={text} />
