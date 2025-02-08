@@ -1,5 +1,11 @@
 <script lang="ts">
-	let { text = $bindable(), class: className = '', ...props } = $props();
+	let { value = $bindable(), readonly = false, class: className = '', ...props } = $props();
+
+	const finalClass = `${className} resize-none`;
 </script>
 
-<input class={`${className}`} value={text} />
+{#if readonly === true}
+	<p class={finalClass}>{value}</p>
+{:else}
+	<textarea class={finalClass} bind:value></textarea>
+{/if}

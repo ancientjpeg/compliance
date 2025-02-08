@@ -1,5 +1,5 @@
 type StringDict = { [term: string]: string }
-type StringArray = [string]
+type StringArray = string[]
 export type Terms = StringDict | StringArray
 
 function isArray(terms: Terms): terms is StringArray {
