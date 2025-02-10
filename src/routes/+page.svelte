@@ -1,10 +1,6 @@
 <script lang="ts">
 	import TextBoxReplacer from '$components/TextBoxReplacer.svelte';
-
-	const defaultReplacer = {
-		shit: 'drattles',
-		damn: 'drikes'
-	};
+	import { defaultReplacer } from '$lib/stringReplace';
 
 	let replacer = $state(defaultReplacer);
 </script>
