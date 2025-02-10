@@ -1,22 +1,28 @@
 import { expect, test } from 'vitest'
-import { stringReplace, defaultReplacer } from './stringReplace'
+import { stringReplace } from './stringReplace'
+import defaultReplacer from './defaultReplacer'
 
 test('stringReplace works as expected', () => {
 
 
-  expect(defaultReplacer.damn).toBe('drikes')
+  expect(defaultReplacer.advocates).toBe('champions')
 
-  let testReplacer: { [term: string]: string } = {
-    "damn": "drikes",
-    "Damn": "Drikes",
-    "dAMn": "drikes",
-    "DAMN": "DRIKES",
-    "damn and": "drikes and",
-    "damn and Shit": "drikes and Drattles",
-  };
 
-  for (const key in testReplacer) {
-    expect(stringReplace(key, defaultReplacer)).toBe(testReplacer[key])
+  const capitalize = (s: string): string => {
+    return s[0].toUpperCase() + s.slice(1)
+  }
+  const antiCapitalize = (s: string): string => {
+    return s[0].toLowerCase() + s.slice(1).toUpperCase()
+  }
+
+
+  for (const key in defaultReplacer) {
+    console.log({ key })
+    expect(key == key.toLowerCase()).toBeTruthy();
+    expect(stringReplace(key, defaultReplacer)).toBe(defaultReplacer[key])
+    expect(stringReplace(capitalize(key), defaultReplacer)).toBe(capitalize(defaultReplacer[key]))
+    expect(stringReplace(antiCapitalize(key), defaultReplacer)).toBe(defaultReplacer[key])
+    expect(stringReplace(key.toUpperCase(), defaultReplacer)).toBe(defaultReplacer[key].toUpperCase())
   }
 
 }) 

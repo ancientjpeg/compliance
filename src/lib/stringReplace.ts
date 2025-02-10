@@ -19,13 +19,24 @@ export const stringReplace = (input: string, terms: Terms): string => {
   for (const key in terms) {
 
     let match;
-    while ((match = RegExp(`${key}`, 'i').exec(input)) !== null) {
+    const re = RegExp(key.toLowerCase(), 'gi')
+    while ((match = re.exec(input)) !== null) {
 
+
+      console.log("LAST IDX: " + re.lastIndex)
       const matchIndex = match.index
-      const matchEnd = matchIndex + match[0].length
+      const matchEnd = re.lastIndex === 0 ? matchIndex + match[0].length : re.lastIndex
       let firstCapital = match[0][0].toUpperCase() == match[0][0];
       let anyLower = /[a-z]/.test(match[0])
 
+      let matchValue = match[0]
+
+      /* additional letters make this technically not a "match */
+      if (matchEnd != input.length && /[A-Za-z]/.test(input[matchEnd])) {
+        console.log("CONTINUE")
+        console.log({ key, matchIndex, matchEnd, matchValue })
+        continue;
+      }
 
       let replacement: string;
 
@@ -43,6 +54,7 @@ export const stringReplace = (input: string, terms: Terms): string => {
       }
 
       input = input.slice(0, matchIndex) + replacement + input.slice(matchEnd)
+      console.log({ key, matchIndex, matchEnd, matchValue, replacement })
 
     }
   }
