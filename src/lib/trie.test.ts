@@ -19,4 +19,13 @@ test("Trie string insertion + contains", () => {
   expect(trie.contains(s1)).toBeTruthy();
   expect(trie.containsExclusive(s1)).toBeFalsy();
   expect(trie.contains(s2)).toBeTruthy();
+
+  let s3 = "hash brown"
+  expect(trie.contains(s3)).toBeFalsy();
+  trie.insert(s3)
+  expect(trie.contains(s1)).toBeTruthy();
+  expect(trie.contains(s2)).toBeTruthy();
+  expect(trie.containsExclusive(s1)).toBeFalsy();
+  expect(trie.containsExclusive(s2)).toBeFalsy();
+  expect(trie.contains(s3)).toBeTruthy();
 })

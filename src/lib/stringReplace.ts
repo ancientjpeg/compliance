@@ -8,6 +8,20 @@ function isArray(terms: Terms): terms is StringArray {
   return Array.isArray(terms)
 }
 
+const adjustReplacementCasing = (original: string, replacement: string): string => {
+
+  const firstCapital = /^[A-Z][a-z]*$/.test(original)
+  const anyLower = /[a-z]/.test(original)
+
+  if (firstCapital && anyLower) {
+    replacement = replacement[0].toUpperCase() + replacement.slice(1)
+  } else if (!anyLower) {
+    replacement = replacement.toUpperCase()
+  }
+
+  return replacement;
+}
+
 
 
 export const stringReplace = (input: string, terms: Terms): string => {
@@ -17,9 +31,11 @@ export const stringReplace = (input: string, terms: Terms): string => {
 
   let ret = ''
 
+  let termKeys = isArray(terms) ? terms : terms.keys()
+
 
   /* TODO: optimize this by only determining max length when terms change */
-  for (const key in terms) {
+  for (const key of termKeys) {
     maxKeyLength = Math.max(key.length, maxKeyLength)
     termsTrie.insert(key)
   }
@@ -27,14 +43,15 @@ export const stringReplace = (input: string, terms: Terms): string => {
 
   let begin = 0;
   while (begin < input.length) {
-    const next_space = input.indexOf(' ', begin);
+    let next_space = input.indexOf(' ', begin);
     if (next_space == begin) {
       ret += ' '
       ++begin;
       continue;
     } else if (next_space == -1) {
-      next_space == input.length
+      next_space = input.length
     }
+    console.log({ begin, next_space })
 
     const word = input.slice(begin, next_space);
     const word_lower = word.toLowerCase();
@@ -42,19 +59,18 @@ export const stringReplace = (input: string, terms: Terms): string => {
       throw new Error("Non-alphanumeric characters aside from space not yet supported. Offending word: " + word)
     }
 
+    console.log({ word, word_lower })
 
     if (termsTrie.contains(word_lower)) {
 
-      let replacement: string;
-
-      if (isArray(terms)) {
-
-      } else {
-      }
-
+      let replacement: string = isArray(terms) ? "[REDACTED]" : adjustReplacementCasing(word, terms.get(word_lower)!);
+      console.log({ ret, replacement })
+      ret += replacement
 
     } else {
-      ret = ret + word
+
+      ret += word
+
     }
 
 
@@ -62,6 +78,7 @@ export const stringReplace = (input: string, terms: Terms): string => {
   }
 
 
-  return input
+  console.log('')
+  return ret
 }
 
