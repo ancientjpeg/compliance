@@ -21,30 +21,6 @@ export const stringReplace = (input: string, terms: Terms): string => {
   }
 
 
-  const memo = Array.from({ length: input.length }, l => Array(l).fill(null))
-
-  const outerEnd = input.length - maxKeyLength + 1;
-
-  for (let i = 0; i < outerEnd; ++i) {
-
-    const innerEnd = i + maxKeyLength;
-    for (let j = i; j < innerEnd; j++) {
-      if (memo[i][j] !== null) {
-        continue;
-      }
-
-      memo[i][j] = true;
-
-
-
-    }
-
-
-  }
-
-
-
-
   return input
 }
 

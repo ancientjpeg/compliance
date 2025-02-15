@@ -1,10 +1,13 @@
 class TrieNode {
   nodes: Array<TrieNode>;
+  terminal: boolean;
   #character: string;
-  constructor() {
+  constructor(c: string = '') {
     this.nodes = new Array<TrieNode>;
-    this.#character = '';
+    this.terminal = false;
+    this.#character = c;
   }
+
 
   append(n: TrieNode) {
     this.nodes.push(n)
@@ -48,19 +51,40 @@ export class Trie {
 
   insert(s: string) {
 
+    let head: TrieNode = this.#head
+
+    for (const c of s) {
+
+      let new_head = head.get_node(c);
+      if (new_head === null) {
+        new_head = new TrieNode(c);
+        head.append(new_head);
+      }
+      head = new_head;
+    }
+
+    head.terminal = true
 
   }
 
   contains(s: string): boolean {
-    let head = this.#head
+    let head: TrieNode | null = this.#head
 
-    for (const c in s) {
+    for (const c of s) {
+
+      head = head.get_node(c)
+      if (head === null) {
+        return false;
+      }
 
     }
 
-
-
-
-    return true;
+    return head.terminal;
   }
+
+  /* TODO: implement */
+  // toArray(): string[] {
+  //   const a = new Array<string>
+  //   return a
+  // }
 }
