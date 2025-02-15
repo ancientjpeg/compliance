@@ -10,7 +10,7 @@ function isArray(terms: Terms): terms is StringArray {
 
 const adjustReplacementCasing = (original: string, replacement: string): string => {
 
-  const firstCapital = /^[A-Z][a-z]*$/.test(original)
+  const firstCapital = /^[A-Z].*$/.test(original)
   const anyLower = /[a-z]/.test(original)
 
   if (firstCapital && anyLower) {
@@ -24,61 +24,47 @@ const adjustReplacementCasing = (original: string, replacement: string): string 
 
 
 
-export const stringReplace = (input: string, terms: Terms): string => {
+export const stringReplace = (input: string, terms: StringMap): string => {
 
-  const termsTrie = new Trie;
-  let maxKeyLength = 0
+  /* TODO: only calculate this once every time a new dict is generated */
+  let maxLength = 0;
+  let minLength = Number.MAX_VALUE;
+  for (const key of terms.keys()) {
+    maxLength = Math.max(maxLength, key.length);
+    minLength = Math.min(minLength, key.length);
+  }
+  console.log({ minLength, maxLength })
+
+  const index_map: Map<number, number> = new Map()
+
+  for (let i = 0; i < input.length; i++) {
+    const innerEnd = Math.min(i + maxLength, input.length)
+    for (let j = i + minLength; j <= innerEnd; ++j) {
+      const word = input.slice(i, j);
+      if (terms.has(word.toLowerCase())) {
+        if (!index_map.has(i) || index_map.get(i)! < j) {
+          index_map.set(i, j)
+        }
+      }
+
+    }
+  }
 
   let ret = ''
 
-  let termKeys = isArray(terms) ? terms : terms.keys()
+  for (let i = 0; i < input.length;) {
 
-
-  /* TODO: optimize this by only determining max length when terms change */
-  for (const key of termKeys) {
-    maxKeyLength = Math.max(key.length, maxKeyLength)
-    termsTrie.insert(key)
-  }
-
-
-  let begin = 0;
-  while (begin < input.length) {
-    let next_space = input.indexOf(' ', begin);
-    if (next_space == begin) {
-      ret += ' '
-      ++begin;
-      continue;
-    } else if (next_space == -1) {
-      next_space = input.length
-    }
-    console.log({ begin, next_space })
-
-    const word = input.slice(begin, next_space);
-    const word_lower = word.toLowerCase();
-    if (!/^[A-Za-z0-9]+$/.test(word)) {
-      throw new Error("Non-alphanumeric characters aside from space not yet supported. Offending word: " + word)
-    }
-
-    console.log({ word, word_lower })
-
-    if (termsTrie.contains(word_lower)) {
-
-      let replacement: string = isArray(terms) ? "[REDACTED]" : adjustReplacementCasing(word, terms.get(word_lower)!);
-      console.log({ ret, replacement })
-      ret += replacement
-
+    if (index_map.has(i)) {
+      const word = input.slice(i, index_map.get(i)!);
+      const word_lower = word.toLowerCase();
+      ret += adjustReplacementCasing(word, terms.get(word_lower)!);
+      i = index_map.get(i)!
     } else {
-
-      ret += word
-
+      ret += input[i++];
     }
-
-
-    begin = next_space
   }
 
-
-  console.log('')
   return ret
+
 }
 
