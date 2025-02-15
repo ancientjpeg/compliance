@@ -1,16 +1,16 @@
 class TrieNode {
-  nodes: Array<TrieNode>;
+  #nodes: Array<TrieNode>;
   terminal: boolean;
   #character: string;
   constructor(c: string = '') {
-    this.nodes = new Array<TrieNode>;
+    this.#nodes = new Array<TrieNode>;
     this.terminal = false;
     this.#character = c;
   }
 
 
   append(n: TrieNode) {
-    this.nodes.push(n)
+    this.#nodes.push(n)
   }
 
   get_node(c: string): TrieNode | null {
@@ -19,7 +19,7 @@ class TrieNode {
       return null;
     }
 
-    for (const n of this.nodes) {
+    for (const n of this.#nodes) {
       if (n.char == c) {
         return n
       }
@@ -39,6 +39,11 @@ class TrieNode {
     }
     this.#character = c;
   }
+
+  get no_children(): boolean {
+    return this.#nodes.length == 0;
+  }
+
 
 };
 
@@ -67,19 +72,37 @@ export class Trie {
 
   }
 
+  /**
+   * return `true` iff `this` contains s 
+   */
   contains(s: string): boolean {
+    const n = this.#containsInternal(s)
+    return n !== null && n.terminal;
+  }
+
+  /**
+   * return `true` iff `this` contains s AND s is not a substring of any other
+   * entries in `this`.
+   */
+  containsExclusive(s: string) {
+    const n = this.#containsInternal(s)
+    return n !== null && n.terminal && n.no_children;
+  }
+
+  #containsInternal(s: string): TrieNode | null {
     let head: TrieNode | null = this.#head
 
     for (const c of s) {
 
       head = head.get_node(c)
       if (head === null) {
-        return false;
+        return head;
       }
 
     }
 
-    return head.terminal;
+    return head;
+
   }
 
   /* TODO: implement */

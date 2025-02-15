@@ -1,3 +1,5 @@
+import { Trie } from "$lib/trie"
+
 type StringDict = { [term: string]: string }
 type StringArray = string[]
 export type Terms = StringDict | StringArray
@@ -10,6 +12,7 @@ function isArray(terms: Terms): terms is StringArray {
 
 export const stringReplace = (input: string, terms: Terms): string => {
 
+  const termsTrie = new Trie;
   let maxKeyLength = 0
 
   const termsAreArray = isArray(terms)
@@ -18,6 +21,7 @@ export const stringReplace = (input: string, terms: Terms): string => {
   /* TODO: optimize this by only determining max length when terms change */
   for (const key in termKeys) {
     maxKeyLength = Math.max(key.length, maxKeyLength)
+    termsTrie.insert(key)
   }
 
 

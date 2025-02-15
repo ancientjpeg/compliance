@@ -10,11 +10,13 @@ test("Trie string insertion + contains", () => {
   expect(trie.contains(s1)).toBeFalsy();
   trie.insert(s1)
   expect(trie.contains(s1)).toBeTruthy();
+  expect(trie.containsExclusive(s1)).toBeTruthy();
   expect(trie.contains(s1.slice(0, s1.length - 1))).toBeFalsy();
 
   let s2 = "hash"
   expect(trie.contains(s2)).toBeFalsy();
   trie.insert(s2)
   expect(trie.contains(s1)).toBeTruthy();
+  expect(trie.containsExclusive(s1)).toBeFalsy();
   expect(trie.contains(s2)).toBeTruthy();
 })
