@@ -7,11 +7,6 @@ function isArray(terms: Terms): terms is StringArray {
 }
 
 
-export const defaultReplacer = {
-  shit: 'drattles',
-  damn: 'drikes'
-};
-
 export const stringReplace = (input: string, terms: Terms): string => {
 
   const termsAreArray = isArray(terms)
