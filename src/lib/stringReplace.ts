@@ -7,51 +7,43 @@ function isArray(terms: Terms): terms is StringArray {
 }
 
 
+
 export const stringReplace = (input: string, terms: Terms): string => {
 
+  let maxKeyLength = 0
+
   const termsAreArray = isArray(terms)
+  const termKeys = termsAreArray ? terms : Object.keys(terms);
 
-  for (const key in terms) {
+  /* TODO: optimize this by only determining max length when terms change */
+  for (const key in termKeys) {
+    maxKeyLength = Math.max(key.length, maxKeyLength)
+  }
 
-    let match;
-    const re = RegExp(key.toLowerCase(), 'gi')
-    while ((match = re.exec(input)) !== null) {
 
+  const memo = Array.from({ length: input.length }, l => Array(l).fill(null))
 
-      console.log("LAST IDX: " + re.lastIndex)
-      const matchIndex = match.index
-      const matchEnd = re.lastIndex === 0 ? matchIndex + match[0].length : re.lastIndex
-      const firstCapital = match[0][0].toUpperCase() == match[0][0];
-      const anyLower = /[a-z]/.test(match[0])
-      const matchValue = match[0]
+  const outerEnd = input.length - maxKeyLength + 1;
 
-      /* additional letters make this technically not a "match */
-      if (matchEnd != input.length && /[A-Za-z]/.test(input[matchEnd])) {
-        console.log("CONTINUE")
-        console.log({ key, matchIndex, matchEnd, matchValue })
+  for (let i = 0; i < outerEnd; ++i) {
+
+    const innerEnd = i + maxKeyLength;
+    for (let j = i; j < innerEnd; j++) {
+      if (memo[i][j] !== null) {
         continue;
       }
 
-      let replacement: string;
+      memo[i][j] = true;
 
-      if (!termsAreArray) {
-        if (firstCapital && anyLower) {
-          replacement = terms[key].toLowerCase()
-          replacement = replacement[0].toUpperCase() + replacement.slice(1)
-        } else if (anyLower) {
-          replacement = terms[key].toLowerCase()
-        } else {
-          replacement = terms[key].toUpperCase()
-        }
-      } else {
-        replacement = "[REDACTED]"
-      }
 
-      input = input.slice(0, matchIndex) + replacement + input.slice(matchEnd)
-      console.log({ key, matchIndex, matchEnd, matchValue, replacement })
 
     }
+
+
   }
+
+
+
 
   return input
 }
