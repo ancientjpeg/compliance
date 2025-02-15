@@ -26,10 +26,9 @@ export const stringReplace = (input: string, terms: Terms): string => {
       console.log("LAST IDX: " + re.lastIndex)
       const matchIndex = match.index
       const matchEnd = re.lastIndex === 0 ? matchIndex + match[0].length : re.lastIndex
-      let firstCapital = match[0][0].toUpperCase() == match[0][0];
-      let anyLower = /[a-z]/.test(match[0])
-
-      let matchValue = match[0]
+      const firstCapital = match[0][0].toUpperCase() == match[0][0];
+      const anyLower = /[a-z]/.test(match[0])
+      const matchValue = match[0]
 
       /* additional letters make this technically not a "match */
       if (matchEnd != input.length && /[A-Za-z]/.test(input[matchEnd])) {

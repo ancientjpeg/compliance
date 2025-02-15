@@ -7,10 +7,10 @@ test('stringReplace works as expected', () => {
 
   expect(defaultReplacer.advocates).toBe('champions')
 
-
   const capitalize = (s: string): string => {
     return s[0].toUpperCase() + s.slice(1)
   }
+
   const antiCapitalize = (s: string): string => {
     return s[0].toLowerCase() + s.slice(1).toUpperCase()
   }
