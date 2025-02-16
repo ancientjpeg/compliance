@@ -7,7 +7,7 @@
 
 	let { replacer = $bindable<StringMap>(), class: className = '' } = $props();
 
-	let sharedClass = 'bg-white h-[90%] w-[45%] border-black border-4 rounded-md';
+	let sharedClass = 'bg-white h-48 w-96 border-black border-4 rounded-md';
 
 	let output = $derived(stringReplace(input, replacer));
 </script>
