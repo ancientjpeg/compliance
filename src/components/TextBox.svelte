@@ -1,8 +1,6 @@
 <script lang="ts">
 	let { value = $bindable(), readonly: readOnly = false, class: className = '' } = $props();
 
-	$inspect(readOnly, value);
-
 	const finalClass = `${className} resize-none`;
 </script>
 

@@ -25,7 +25,6 @@ const adjustReplacementCasing = (original: string, replacement: string): string 
 
 
 export const stringReplace = (input: string, terms: StringMap): string => {
-
   /* TODO: only calculate this once every time a new dict is generated */
   let maxLength = 0;
   let minLength = Number.MAX_VALUE;
@@ -33,7 +32,6 @@ export const stringReplace = (input: string, terms: StringMap): string => {
     maxLength = Math.max(maxLength, key.length);
     minLength = Math.min(minLength, key.length);
   }
-  console.log({ minLength, maxLength })
 
   const index_map: Map<number, number> = new Map()
 

@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { stringReplace } from './stringReplace'
 import defaultReplacer from './defaultReplacer'
 
-test('stringReplace works as expected', () => {
+test('stringReplace replaces all words in default replacer', () => {
 
 
   expect(defaultReplacer.get('advocates')).toBe('champions')
@@ -17,7 +17,6 @@ test('stringReplace works as expected', () => {
 
 
   for (const key of defaultReplacer.keys()) {
-    console.log({ key })
     expect(key == key.toLowerCase()).toBeTruthy();
     expect(stringReplace(key, defaultReplacer)).toBe(defaultReplacer.get(key))
     expect(stringReplace(capitalize(key), defaultReplacer)).toBe(capitalize(defaultReplacer.get(key)!))
@@ -25,4 +24,18 @@ test('stringReplace works as expected', () => {
     expect(stringReplace(key.toUpperCase(), defaultReplacer)).toBe(defaultReplacer.get(key)!.toUpperCase())
   }
 
-}) 
+})
+
+test('stringReplace prioritizes longest match', () => {
+
+  let replacer = new Map(
+    [
+      ["the", "not the"],
+      ["sea", "not sea"],
+      ["the sea", "not the sea"]
+    ]
+  )
+
+  expect(stringReplace("the sea", replacer)).toBe("not the sea")
+
+})

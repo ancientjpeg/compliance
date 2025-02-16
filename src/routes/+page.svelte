@@ -1,7 +1,6 @@
 <script lang="ts">
 	import TextBoxReplacer from '$components/TextBoxReplacer.svelte';
 	import defaultReplacer from '$lib/defaultReplacer';
-
 	let replacer = $state(defaultReplacer);
 </script>
 
