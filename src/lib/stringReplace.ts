@@ -1,12 +1,4 @@
-import { Trie } from "$lib/trie"
-
-type StringMap = Map<string, string>
-type StringArray = string[]
-export type Terms = StringMap | StringArray
-
-function isArray(terms: Terms): terms is StringArray {
-  return Array.isArray(terms)
-}
+export type StringMap = Map<string, string>
 
 const adjustReplacementCasing = (original: string, replacement: string): string => {
 

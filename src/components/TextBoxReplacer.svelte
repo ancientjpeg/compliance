@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { Terms } from '$lib/stringReplace';
+	import type { StringMap } from '$lib/stringReplace';
 	import TextBox from '$components/TextBox.svelte';
 	import { stringReplace } from '$lib/stringReplace';
 
 	let input = $state('Input your text here');
 
-	let { replacer = $bindable<Terms>(), class: className = '' } = $props();
+	let { replacer = $bindable<StringMap>(), class: className = '' } = $props();
 
 	let sharedClass = 'bg-white h-[90%] w-[45%] border-black border-4 rounded-md';
 
-	let output = $derived(stringReplace(input, replacer as Terms));
+	let output = $derived(stringReplace(input, replacer));
 </script>
 
 <div class={`flex flex-row justify-evenly items-center ${className}`}>
