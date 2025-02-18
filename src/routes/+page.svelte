@@ -6,7 +6,6 @@
 		showPopup = !showPopup;
 	};
 
-	import TextBox from '$components/TextBox.svelte';
 	import { stringReplace } from '$lib/stringReplace';
 
 	const defaultInput = 'Input your text here.';
@@ -31,7 +30,7 @@
 		<div class="grow-6 w-full basis-0">!!!!</div>
 	{:else}
 		<div class="flex flex-col md:flex-row justify-evenly items-center grow-6 w-full basis-0">
-			<TextBox bind:value={input} class={`${sharedClass} hover:scale-101 transition`} />
+			<textarea class={`resize-none overflow-hidden ${sharedClass}`} bind:value={input}></textarea>
 			<p class={`resize-none overflow-hidden ${sharedClass}`}>{output}</p>
 		</div>
 	{/if}
