@@ -1,7 +1,7 @@
 <script lang="ts">
 	let { value = $bindable(), readonly: readOnly = false, class: className = '' } = $props();
 
-	const finalClass = `${className} resize-none`;
+	const finalClass = `${className} resize-none overflow-hidden`;
 </script>
 
 {#if readOnly === true}

@@ -7,12 +7,12 @@
 
 	let { replacer = $bindable<StringMap>(), class: className = '' } = $props();
 
-	let sharedClass = 'bg-white h-48 w-96 border-black border-4 rounded-md';
+	let sharedClass = 'bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg';
 
 	let output = $derived(stringReplace(input, replacer));
 </script>
 
-<div class={`flex flex-row justify-evenly items-center ${className}`}>
+<div class={`flex flex-col md:flex-row justify-evenly items-center ${className}`}>
 	<TextBox bind:value={input} class={`${sharedClass} hover:scale-101 transition`} />
 	<TextBox value={output} readonly={true} class={sharedClass} />
 </div>
