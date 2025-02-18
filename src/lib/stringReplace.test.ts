@@ -31,11 +31,13 @@ test('stringReplace prioritizes longest match', () => {
   let replacer = new Map(
     [
       ["the", "not the"],
-      ["sea", "not sea"],
+      ["sea", "lake"],
       ["the sea", "not the sea"]
     ]
   )
 
-  expect(stringReplace("the sea", replacer)).toBe("not the sea")
+  expect(stringReplace("The Sea", replacer)).toBe("Not the sea")
+  expect(stringReplace("The stuff", replacer)).toBe("Not the stuff")
+  expect(stringReplace("I love seas!", replacer)).toBe("I love lakes!")
 
 })
