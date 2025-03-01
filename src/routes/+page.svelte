@@ -1,5 +1,6 @@
 <script lang="ts">
 	import defaultReplacer from '$lib/defaultReplacer';
+	import TextBox from '$components/TextBox.svelte';
 	let replacer = $state(defaultReplacer);
 	let showPopup = $state(false);
 	const togglePopup = () => {
@@ -13,7 +14,7 @@
 
 	const defaultState = $derived(input == defaultInput);
 
-	const sharedClass = 'bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg';
+	const entryElementStyle = 'bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg';
 
 	let output = $derived(defaultState ? 'Text will output here.' : stringReplace(input, replacer));
 </script>
@@ -30,8 +31,8 @@
 		<div class="grow-6 w-full basis-0">!!!!</div>
 	{:else}
 		<div class="flex flex-col md:flex-row justify-evenly items-center grow-6 w-full basis-0">
-			<textarea class={`resize-none overflow-hidden ${sharedClass}`} bind:value={input}></textarea>
-			<p class={`resize-none overflow-hidden ${sharedClass}`}>{output}</p>
+			<TextBox bind:text={input} className={entryElementStyle} />
+			<p class={`resize-none overflow-hidden ${entryElementStyle}`}>{output}</p>
 		</div>
 	{/if}
 </div>
