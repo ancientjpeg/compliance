@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { defaultInput, userInput } from '$lib/state/userInput.svelte';
+
 	import defaultReplacer from '$lib/defaultReplacer';
 	import TextBox from '$components/TextBox.svelte';
+
 	let replacer = $state(defaultReplacer);
 	let showPopup = $state(false);
 	const togglePopup = () => {
@@ -9,14 +12,13 @@
 
 	import { stringReplace } from '$lib/stringReplace';
 
-	const defaultInput = 'Input your text here.';
-	let input = $state(defaultInput);
-
-	const defaultState = $derived(input == defaultInput);
+	const defaultState = $derived(userInput.text == defaultInput);
 
 	const entryElementStyle = 'bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg';
 
-	let output = $derived(defaultState ? 'Text will output here.' : stringReplace(input, replacer));
+	let output = $derived(
+		defaultState ? 'Text will output here.' : stringReplace(userInput.text, replacer)
+	);
 </script>
 
 <div class="flex items-center justify-center flex-col w-full h-full">
@@ -31,7 +33,7 @@
 		<div class="grow-6 w-full basis-0">!!!!</div>
 	{:else}
 		<div class="flex flex-col md:flex-row justify-evenly items-center grow-6 w-full basis-0">
-			<TextBox bind:text={input} className={entryElementStyle} />
+			<TextBox className={entryElementStyle} />
 			<p class={`resize-none overflow-hidden ${entryElementStyle}`}>{output}</p>
 		</div>
 	{/if}
