@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { defaultInput, userInput } from '$lib/state/userInput.svelte';
-
 	import defaultReplacer from '$lib/defaultReplacer';
+	import { defaultInput, userInput } from '$lib/state/userInput.svelte';
+	import stringReplace from '$lib/stringReplace';
+
+	import FileInput from '$components/FileInput.svelte';
 	import TextBox from '$components/TextBox.svelte';
 
 	let replacer = $state(defaultReplacer);
@@ -9,8 +11,6 @@
 	const togglePopup = () => {
 		showPopup = !showPopup;
 	};
-
-	import { stringReplace } from '$lib/stringReplace';
 
 	const defaultState = $derived(userInput.text == defaultInput);
 
@@ -29,6 +29,7 @@
 			onclick={togglePopup}>{(showPopup ? 'Hide' : 'Show') + ' replacement list'}</button
 		>
 	</div>
+	<div class="grow-2"></div>
 	{#if showPopup}
 		<div class="grow-6 w-full basis-0">!!!!</div>
 	{:else}

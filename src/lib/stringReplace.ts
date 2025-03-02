@@ -1,4 +1,4 @@
-export type StringMap = Map<string, string>
+import type { Replacer } from "./replacer"
 
 const adjustReplacementCasing = (original: string, replacement: string): string => {
 
@@ -16,7 +16,7 @@ const adjustReplacementCasing = (original: string, replacement: string): string 
 
 
 
-export const stringReplace = (input: string, terms: StringMap): string => {
+export default (input: string, terms: Replacer): string => {
   /* TODO: only calculate this once every time a new dict is generated */
   let maxLength = 0;
   let minLength = Number.MAX_VALUE;
