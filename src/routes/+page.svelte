@@ -4,6 +4,7 @@
 	import stringReplace from '$lib/stringReplace';
 
 	import FileInput from '$components/FileInput.svelte';
+	import FileInputContainer from '$components/FileInputContainer.svelte';
 	import TextBox from '$components/TextBox.svelte';
 
 	let replacer = $state(defaultReplacer);
@@ -32,13 +33,16 @@
 			<div class="grow-6">!!!!</div>
 		{:else}
 			{#each [0, 1] as idx}
-				<div class="bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg">
+				<FileInputContainer
+					class="bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg"
+				>
+					<p>hi</p>
 					{#if idx == 0}
 						<TextBox className="w-full h-full" />
 					{:else}
 						<p class={`resize-none overflow-hidden`}>{output}</p>
 					{/if}
-				</div>
+				</FileInputContainer>
 			{/each}
 		{/if}
 	</div>
