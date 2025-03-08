@@ -2,7 +2,7 @@
 	import { userInput } from '$lib/state/userInput.svelte';
 
 	interface Props {
-		className: string | undefined;
+		className?: string;
 	}
 
 	let text = $state(userInput.text);
