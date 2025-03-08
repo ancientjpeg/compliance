@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { stringReplace } from './stringReplace'
+import stringReplace from './stringReplace'
 import defaultReplacer from './defaultReplacer'
 
 test('stringReplace replaces all words in default replacer', () => {
