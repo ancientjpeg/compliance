@@ -3,6 +3,7 @@
 	import defaultReplacer from '$lib/defaultReplacer';
 	import stringReplace from '$lib/stringReplace';
 	import FileInput from './FileInput.svelte';
+	import FileOutput from './FileOutput.svelte';
 	import TextBox from './TextBox.svelte';
 
 	import { userInput } from '$lib/state/userInput.svelte';
@@ -33,7 +34,7 @@
 	{#if isInput}
 		<FileInput class="h-8" {onFilesChanged} />
 	{:else}
-		<p class="h-8">FielOutput</p>
+		<FileOutput text={output} class="h-8" />
 	{/if}
 	<div class="h-1 bg-black"></div>
 	{#if isInput}
