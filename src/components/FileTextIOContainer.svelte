@@ -17,7 +17,7 @@
 	} = $props();
 
 	const onFilesChanged = (files: FileList) => {
-		$inspect(files);
+		console.log(files);
 	};
 
 	const defaultState = $derived(userInput.text == defaultInput);
