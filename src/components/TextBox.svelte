@@ -1,16 +1,7 @@
 <script lang="ts">
 	import { userInput } from '$lib/state/userInput.svelte';
 
-	interface Props {
-		className: string | undefined;
-	}
-
-	let text = $state(userInput.text);
-	let { className }: Props = $props();
-
-	$effect(() => {
-		userInput.text = text;
-	});
+	let { class: className }: { class?: string } = $props();
 </script>
 
-<textarea class={`resize-none overflow-hidden ${className}`} bind:value={text}></textarea>
+<textarea class={`resize-none overflow-hidden ${className}`} bind:value={userInput.text}></textarea>
