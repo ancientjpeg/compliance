@@ -1,19 +1,42 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { defaultInput } from '$lib/state/userInput.svelte';
+	import defaultReplacer from '$lib/defaultReplacer';
+	import stringReplace from '$lib/stringReplace';
 	import FileInput from './FileInput.svelte';
+	import TextBox from './TextBox.svelte';
+
+	import { userInput } from '$lib/state/userInput.svelte';
+	let replacer = $state(defaultReplacer);
 
 	let {
-		children: child,
+		isInput,
 		class: className
 	}: {
-		children: Snippet;
+		isInput: boolean;
 		class?: string;
 	} = $props();
+
+	const onFilesChanged = (files: FileList) => {};
+
+	const defaultState = $derived(userInput.text == defaultInput);
+
+	let output = $derived(
+		defaultState ? 'Text will output here.' : stringReplace(userInput.text, replacer)
+	);
 </script>
 
-<div class="flex flex-col {className}">
-	<FileInput class="h-8" labelText="File Input:" />
-	<div class="h-1 bg-black"></div>
+<div class="flex flex-col {className}"></div>
 
-	{@render child()}
+<div class="bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg">
+	{#if isInput}
+		<FileInput class="h-8" {onFilesChanged} />
+	{:else}
+		<p>FielOutput</p>
+	{/if}
+	<div class="h-1 bg-black"></div>
+	{#if isInput}
+		<TextBox class="w-full h-full" />
+	{:else}
+		<p class={`resize-none overflow-hidden`}>{output}</p>
+	{/if}
 </div>

@@ -4,19 +4,11 @@
 	import stringReplace from '$lib/stringReplace';
 
 	import FileInputContainer from '$components/FileInputContainer.svelte';
-	import TextBox from '$components/TextBox.svelte';
 
-	let replacer = $state(defaultReplacer);
 	let showPopup = $state(false);
 	const togglePopup = () => {
 		showPopup = !showPopup;
 	};
-
-	const defaultState = $derived(userInput.text == defaultInput);
-
-	let output = $derived(
-		defaultState ? 'Text will output here.' : stringReplace(userInput.text, replacer)
-	);
 </script>
 
 <div class="flex items-center justify-center flex-col w-95/100 h-95/100 border-4 border-black">
@@ -31,16 +23,8 @@
 		{#if showPopup}
 			<div class="grow-6">!!!!</div>
 		{:else}
-			{#each [0, 1] as idx}
-				<FileInputContainer
-					class="bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg "
-				>
-					{#if idx == 0}
-						<TextBox />
-					{:else}
-						<p class={`resize-none overflow-hidden`}>{output}</p>
-					{/if}
-				</FileInputContainer>
+			{#each [true, false] as isInput}
+				<FileInputContainer {isInput} />
 			{/each}
 		{/if}
 	</div>

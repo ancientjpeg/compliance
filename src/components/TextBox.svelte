@@ -1,12 +1,8 @@
 <script lang="ts">
 	import { userInput } from '$lib/state/userInput.svelte';
 
-	interface Props {
-		className?: string;
-	}
-
 	let text = $state(userInput.text);
-	let { className }: Props = $props();
+	let { class: className }: { class?: string } = $props();
 
 	$effect(() => {
 		userInput.text = text;
