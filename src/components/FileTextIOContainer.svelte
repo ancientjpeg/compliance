@@ -16,7 +16,9 @@
 		class?: string;
 	} = $props();
 
-	const onFilesChanged = (files: FileList) => {};
+	const onFilesChanged = (files: FileList) => {
+		$inspect(files);
+	};
 
 	const defaultState = $derived(userInput.text == defaultInput);
 
@@ -27,15 +29,15 @@
 
 <div class="flex flex-col {className}"></div>
 
-<div class="bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg">
+<div class="bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg flex flex-col">
 	{#if isInput}
 		<FileInput class="h-8" {onFilesChanged} />
 	{:else}
-		<p>FielOutput</p>
+		<p class="h-8">FielOutput</p>
 	{/if}
 	<div class="h-1 bg-black"></div>
 	{#if isInput}
-		<TextBox class="w-full h-full" />
+		<TextBox class="grow-1" />
 	{:else}
 		<p class={`resize-none overflow-hidden`}>{output}</p>
 	{/if}

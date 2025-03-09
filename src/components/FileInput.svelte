@@ -1,8 +1,6 @@
 <script lang="ts">
 	let files: FileList | undefined = $state();
 
-	import { userInput } from '$lib/state/userInput.svelte';
-
 	let {
 		onFilesChanged,
 		labelText,
