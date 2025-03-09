@@ -16,8 +16,8 @@
 		class?: string;
 	} = $props();
 
-	const onFilesChanged = (files: FileList) => {
-		console.log(files);
+	const onFilesChanged = (fileText: string) => {
+		userInput.text = fileText;
 	};
 
 	const defaultState = $derived(userInput.text == defaultInput);
