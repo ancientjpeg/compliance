@@ -16,8 +16,9 @@
 		class?: string;
 	} = $props();
 
-	const onFilesChanged = (fileText: string) => {
+	const onFilesChanged = (fileName: string, fileText: string) => {
 		userInput.text = fileText;
+		userInput.filename = fileName;
 	};
 
 	const defaultState = $derived(userInput.text == defaultInput);
@@ -26,8 +27,9 @@
 		defaultState ? 'Text will output here.' : stringReplace(userInput.text, replacer)
 	);
 
-	const buttonSharedStyle =
-		'active:bg-gray-400 hover:bg-gray-200 h-8 flex justify-center items-center';
+	/** TODO refactor this so the buttons have a shared class */
+	const buttonInactiveStyle = 'h-8 flex justify-center items-center';
+	const buttonSharedStyle = `${buttonInactiveStyle} active:bg-gray-400 hover:bg-gray-200`;
 	const textBoxSharedStyle = 'grow-1 basis-0 overflow-scroll resize-none p-4';
 </script>
 
@@ -37,7 +39,12 @@
 	{#if isInput}
 		<FileInput class={buttonSharedStyle} {onFilesChanged} />
 	{:else}
-		<FileOutput class={buttonSharedStyle} text={output} />
+		<FileOutput
+			class={buttonSharedStyle}
+			activeClass={buttonInactiveStyle}
+			text={defaultState ? undefined : output}
+			filename={userInput.filename}
+		/>
 	{/if}
 	<div class="h-1 bg-black"></div>
 	{#if isInput}

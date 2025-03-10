@@ -1,22 +1,42 @@
 <script lang="ts">
-	/*******************************************************/
-	/* TODO this is fully ChatGPT code. Review and cleanup */
-	/*******************************************************/
+	const {
+		text,
+		filename,
+		class: className,
+		activeClass: inactiveClass
+	}: { text?: string; filename?: string; class?: string; activeClass?: string } = $props();
 
-	const { text, class: className }: { text: string; class?: string } = $props();
-	let filename = 'download.txt';
+	let download: string = $derived.by(() => {
+		if (!filename) {
+			return 'compliant_text.txt';
+		} else {
+			/** TODO handle multiple dots in filename */
+			const [base, ext] = filename.split('.');
+			return `${base}.compliant.${ext}`;
+		}
+	});
 
-	function download() {
+	let href: string | undefined = $state();
+
+	$effect(() => {
+		if (!text) {
+			href = undefined;
+			return;
+		}
+
 		const blob = new Blob([text], { type: 'text/plain' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-	}
+		href = URL.createObjectURL(blob);
+
+		return () => {
+			if (href) {
+				URL.revokeObjectURL(href);
+			}
+		};
+	});
 </script>
 
-<button class={className} onclick={download}>Download File</button>
+{#if href}
+	<a {href} {download} class={className}>Download {download}</a>
+{:else}
+	<div class={inactiveClass}>Waiting For Input...</div>
+{/if}
