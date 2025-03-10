@@ -28,9 +28,9 @@
 	);
 </script>
 
-<div class="flex flex-col {className}"></div>
-
-<div class="bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg flex flex-col">
+<div
+	class={`bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg flex flex-col ${className}`}
+>
 	{#if isInput}
 		<FileInput class="h-8" {onFilesChanged} />
 	{:else}
