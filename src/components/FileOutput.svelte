@@ -8,11 +8,12 @@
 
 	let download: string = $derived.by(() => {
 		if (!filename) {
-			return 'compliant_text.txt';
+			return 'compliant.txt';
 		} else {
-			/** TODO handle multiple dots in filename */
-			const [base, ext] = filename.split('.');
-			return `${base}.compliant.${ext}`;
+			const splits = filename.split('.');
+			const ext = splits.length > 1 ? `.${splits.pop()}` : '';
+			const base = splits.join('.');
+			return `${base}.compliant${ext}`;
 		}
 	});
 
