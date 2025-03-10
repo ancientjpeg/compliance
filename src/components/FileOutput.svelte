@@ -19,4 +19,4 @@
 	}
 </script>
 
-<button class={`hover:bg-gray-200 ${className}`} onclick={download}>Download File</button>
+<button class={className} onclick={download}>Download File</button>

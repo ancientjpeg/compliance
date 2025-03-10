@@ -11,7 +11,7 @@
 	<h1 class="text-3xl grow-0 shrink-0 flex basis-36 items-center">&#x2728 compliance &#x2728</h1>
 	<div class="grow-1 basis-0 my-auto flex justify-center items-center">
 		<button
-			class="h-12 md:w-72 w-48 border-black border-4 rounded-lg hover:bg-gray-50"
+			class="h-12 md:w-72 w-48 border-black border-4 rounded-default hover:bg-gray-50"
 			onclick={togglePopup}>{(showPopup ? 'Hide' : 'Show') + ' replacement list'}</button
 		>
 	</div>

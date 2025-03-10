@@ -4,7 +4,6 @@
 	import stringReplace from '$lib/stringReplace';
 	import FileInput from './FileInput.svelte';
 	import FileOutput from './FileOutput.svelte';
-	import TextBox from './TextBox.svelte';
 
 	import { userInput } from '$lib/state/userInput.svelte';
 	let replacer = $state(defaultReplacer);
@@ -26,20 +25,24 @@
 	let output = $derived(
 		defaultState ? 'Text will output here.' : stringReplace(userInput.text, replacer)
 	);
+
+	const buttonSharedStyle =
+		'active:bg-gray-400 hover:bg-gray-200 h-8 flex justify-center items-center';
+	const textBoxSharedStyle = 'grow-1 basis-0 overflow-scroll resize-none p-4';
 </script>
 
 <div
-	class={`bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-lg flex flex-col ${className}`}
+	class={`bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-default flex flex-col ${className} overflow-hidden`}
 >
 	{#if isInput}
-		<FileInput class="h-8" {onFilesChanged} />
+		<FileInput class={buttonSharedStyle} {onFilesChanged} />
 	{:else}
-		<FileOutput text={output} class="h-8" />
+		<FileOutput class={buttonSharedStyle} text={output} />
 	{/if}
 	<div class="h-1 bg-black"></div>
 	{#if isInput}
-		<TextBox class="grow-1" />
+		<textarea class={textBoxSharedStyle} bind:value={userInput.text}></textarea>
 	{:else}
-		<p class={`resize-none overflow-hidden`}>{output}</p>
+		<p class={textBoxSharedStyle}>{output}</p>
 	{/if}
 </div>
