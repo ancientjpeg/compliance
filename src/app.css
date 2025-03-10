@@ -1,1 +1,5 @@
 @import 'tailwindcss';
+
+@theme {
+  --radius-default: var(--radius-lg);
+}
