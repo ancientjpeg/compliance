@@ -6,6 +6,7 @@ export type UserData = {
 };
 export const defaultInput = 'Input your text here.';
 export const defaultOutput = 'Text will output here.';
+
 export function getOutputFilename(filename: string | undefined) {
   if (!filename) {
     return 'compliant.txt';
@@ -20,13 +21,13 @@ export function getOutputFilename(filename: string | undefined) {
 export const userInput
   : UserData
   = $state({
-    text: Promise.resolve(defaultInput),
+    text: Promise.resolve(''),
     filename: undefined
   })
 
 export const userOutput: UserData = $state(
   {
-    text: Promise.resolve(defaultOutput),
+    text: Promise.resolve(''),
     filename: getOutputFilename(undefined)
   }
 );
