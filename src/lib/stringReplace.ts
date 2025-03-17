@@ -1,4 +1,5 @@
 import type { Replacer } from "./replacer"
+import { DocFile } from "./parse/docxIO"
 
 const adjustReplacementCasing = (original: string, replacement: string): string => {
 
@@ -14,9 +15,8 @@ const adjustReplacementCasing = (original: string, replacement: string): string 
   return replacement;
 }
 
+const stringReplaceInternal = (input: string, terms: Replacer): string => {
 
-
-export default (input: string, terms: Replacer): string => {
   /* TODO: only calculate this once every time a new dict is generated */
   let maxLength = 0;
   let minLength = Number.MAX_VALUE;
@@ -58,3 +58,13 @@ export default (input: string, terms: Replacer): string => {
 
 }
 
+const stringReplace = (input: string | DocFile, terms: Replacer): string | DocFile => {
+  if (input instanceof DocFile) {
+    input.forEachTextBlock(s => stringReplaceInternal(s, terms));
+    return input;
+  }
+  return stringReplaceInternal(input, terms);
+}
+
+
+export default stringReplace;
