@@ -1,5 +1,6 @@
 import { test, expect } from 'vitest'
 import replacerVerify from '$lib/replacerVerify'
+import defaultReplacer from './defaultReplacer';
 
 test('Replacer verification works as expected', () => {
 
@@ -27,3 +28,8 @@ test('Replacer verification works as expected', () => {
   expect(replacerVerify(goodInput)).toBeNull();
 })
 
+
+test('Default replacer passes verification', () => {
+  const output = replacerVerify(defaultReplacer)
+  expect(output).toBeNull();
+})
