@@ -58,9 +58,9 @@ const stringReplaceInternal = (input: string, terms: Replacer): string => {
 
 }
 
-const stringReplace = (input: string | DocFile, terms: Replacer): string | DocFile => {
+const stringReplace = async (input: string | DocFile, terms: Replacer): Promise<string | DocFile> => {
   if (input instanceof DocFile) {
-    input.forEachTextBlock(s => stringReplaceInternal(s, terms));
+    await input.forEachTextBlock(s => stringReplaceInternal(s, terms));
     return input;
   }
   return stringReplaceInternal(input, terms);
