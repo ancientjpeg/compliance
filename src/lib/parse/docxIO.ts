@@ -1,5 +1,5 @@
 import * as xml from 'fast-xml-parser'
-import JSZip, { type JSZipObject } from 'jszip'
+import JSZip from 'jszip'
 
 function isProperObject(object: any) {
   if (object === null) {
@@ -28,16 +28,22 @@ function forEachStringWithMatchingKey(object: any, key: string, fn: (s: string) 
   return object;
 }
 
+
 export class DocFile {
   #zipFile: JSZip | null = null;
   #fileData: Blob;
   #xmlJObj: any;
   #docPath: string
+  #xmlOptions: any
 
   constructor(fileData: Blob) {
     this.#fileData = fileData;
     this.#xmlJObj = null;
     this.#docPath = 'word/document.xml';
+    this.#xmlOptions = {
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_"
+    };
   }
 
   /** 
@@ -57,9 +63,16 @@ export class DocFile {
       throw Error("Unable to find expected document.xml in unzipped word doc");
     }
 
-    const docText = await doc.async('text');
-    const parser = new xml.XMLParser();
-    this.#xmlJObj = parser.parse(docText);
+
+
+    const docTextPromise = doc.async('text');
+
+    const parser = new xml.XMLParser(this.#xmlOptions);
+
+    this.#xmlJObj = parser.parse(await docTextPromise);
+
+    console.log(this.#xmlJObj);
+
     if (!this.loaded) {
       throw Error("XML parse failed");
     }
@@ -78,8 +91,9 @@ export class DocFile {
   async getDataAsZip(): Promise<Blob> {
     await this.load();
 
-    const builder = new xml.XMLBuilder();
+    const builder = new xml.XMLBuilder(this.#xmlOptions);
     const xmlDataString = builder.build(this.#xmlJObj);
+    console.log(xmlDataString);
     this.#zipFile!.file(this.#docPath, xmlDataString);
     return this.#zipFile!.generateAsync({ type: 'blob' });
 
