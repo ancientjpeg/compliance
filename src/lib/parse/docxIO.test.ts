@@ -8,7 +8,7 @@ import defaultReplacer from "$lib/defaultReplacer";
 const getDocStrings = async (path: string): Promise<Array<string>> => {
   const buf: Buffer = await fs.readFile(path);
   const strings = new Array<string>();
-  const doc = new DocFile(new Blob([buf]));
+  const doc = await DocFile.createDocFile(new Blob([buf]));
   await doc.forEachTextBlock((s: string) => {
     strings.push(s);
     return s;
@@ -45,7 +45,7 @@ test("Docx export operates as expected with stringReplace", async () => {
   }
 
   const fbuf: Buffer = await fs.readFile(docPath)
-  const docFile = new DocFile(new Blob([fbuf]));
+  const docFile = await DocFile.createDocFile(new Blob([fbuf]));
 
   await stringReplace(docFile, defaultReplacer);
 

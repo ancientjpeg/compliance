@@ -36,7 +36,7 @@ export class DocFile {
   #docPath: string
   #xmlOptions: any
 
-  constructor(fileData: Blob) {
+  private constructor(fileData: Blob) {
     this.#fileData = fileData;
     this.#xmlJObj = null;
     this.#docPath = 'word/document.xml';
@@ -46,49 +46,57 @@ export class DocFile {
     };
   }
 
+
+
   /** 
    * @brief Loads the passed docx file blob into memory by unzipping it
    */
-  async load() {
-    if (this.loaded) {
-      return;
-    }
+  static async createDocFile(fileData: Blob) : Promise<DocFile> {
+    const d = new DocFile(fileData);
 
-    const data = await this.#fileData.arrayBuffer();
-    this.#zipFile = await JSZip.loadAsync(data);
+    const data = await d.#fileData.arrayBuffer();
+    d.#zipFile = await JSZip.loadAsync(data);
 
     /* TS doesn't know, but #zipFile is guaranteed to exist here */
-    const doc = this.#zipFile!.file(this.#docPath);
+    const doc = d.#zipFile!.file(d.#docPath);
     if (doc === null) {
       throw Error("Unable to find expected document.xml in unzipped word doc");
     }
 
-
-
     const docTextPromise = doc.async('text');
 
-    const parser = new xml.XMLParser(this.#xmlOptions);
+    const parser = new xml.XMLParser(d.#xmlOptions);
 
-    this.#xmlJObj = parser.parse(await docTextPromise);
+    d.#xmlJObj = parser.parse(await docTextPromise);
 
-    if (!this.loaded) {
+    if (!d.loaded) {
       throw Error("XML parse failed");
     }
 
+    return d;
 
   }
 
   /** May throw iff `!this.loaded` */
   async forEachTextBlock(fn: (s: string) => string) {
-    await this.load();
+    this.#checkLoaded();
     /** TS compiler can't tell but this is guaranteed to exist now */
     this.#xmlJObj = forEachStringWithMatchingKey(this.#xmlJObj, "w:t", fn);
 
   }
 
-  async getDataAsZip(): Promise<Blob> {
-    await this.load();
+  async getText() {
+    this.#checkLoaded();
+    let ret: string = '';
+    await this.forEachTextBlock(s => {
+      ret += s;
+      return s;
+    });
+    return ret;
+  }
 
+  async getDataAsZip(): Promise<Blob> {
+    this.#checkLoaded();
     const builder = new xml.XMLBuilder(this.#xmlOptions);
     const xmlDataString = builder.build(this.#xmlJObj);
     this.#zipFile!.file(this.#docPath, xmlDataString);
@@ -98,6 +106,12 @@ export class DocFile {
 
   get loaded(): boolean {
     return this.#xmlJObj && Object.keys(this.#xmlJObj).length !== 0
+  }
+
+  #checkLoaded() {
+    if (!this.loaded) {
+      throw new Error('DocFile is not loaded');
+    }
   }
 
 
