@@ -71,8 +71,6 @@ export class DocFile {
 
     this.#xmlJObj = parser.parse(await docTextPromise);
 
-    console.log(this.#xmlJObj);
-
     if (!this.loaded) {
       throw Error("XML parse failed");
     }
@@ -93,7 +91,6 @@ export class DocFile {
 
     const builder = new xml.XMLBuilder(this.#xmlOptions);
     const xmlDataString = builder.build(this.#xmlJObj);
-    console.log(xmlDataString);
     this.#zipFile!.file(this.#docPath, xmlDataString);
     return this.#zipFile!.generateAsync({ type: 'blob' });
 
