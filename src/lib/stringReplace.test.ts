@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import stringReplace from './stringReplace'
 import defaultReplacer from './defaultReplacer'
 
-test('stringReplace replaces all words in default replacer', () => {
+test('stringReplace replaces all words in default replacer', async () => {
 
 
   expect(defaultReplacer.get('advocates')).toBe('champions')
@@ -18,15 +18,15 @@ test('stringReplace replaces all words in default replacer', () => {
 
   for (const key of defaultReplacer.keys()) {
     expect(key == key.toLowerCase()).toBeTruthy();
-    expect(stringReplace(key, defaultReplacer)).toBe(defaultReplacer.get(key))
-    expect(stringReplace(capitalize(key), defaultReplacer)).toBe(capitalize(defaultReplacer.get(key)!))
-    expect(stringReplace(antiCapitalize(key), defaultReplacer)).toBe(defaultReplacer.get(key))
-    expect(stringReplace(key.toUpperCase(), defaultReplacer)).toBe(defaultReplacer.get(key)!.toUpperCase())
+    expect(await stringReplace(key, defaultReplacer)).toBe(defaultReplacer.get(key))
+    expect(await stringReplace(capitalize(key), defaultReplacer)).toBe(capitalize(defaultReplacer.get(key)!))
+    expect(await stringReplace(antiCapitalize(key), defaultReplacer)).toBe(defaultReplacer.get(key))
+    expect(await stringReplace(key.toUpperCase(), defaultReplacer)).toBe(defaultReplacer.get(key)!.toUpperCase())
   }
 
 })
 
-test('stringReplace prioritizes longest match', () => {
+test('stringReplace prioritizes longest match', async () => {
 
   let replacer = new Map(
     [
@@ -36,8 +36,8 @@ test('stringReplace prioritizes longest match', () => {
     ]
   )
 
-  expect(stringReplace("The Sea", replacer)).toBe("Not the sea")
-  expect(stringReplace("The stuff", replacer)).toBe("Not the stuff")
-  expect(stringReplace("I love seas!", replacer)).toBe("I love lakes!")
+  expect(await stringReplace("The Sea", replacer)).toBe("Not the sea")
+  expect(await stringReplace("The stuff", replacer)).toBe("Not the stuff")
+  expect(await stringReplace("I love seas!", replacer)).toBe("I love lakes!")
 
 })

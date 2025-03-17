@@ -5,7 +5,7 @@
 		onFilesChanged,
 		class: className
 	}: {
-		onFilesChanged: (fileName: string, fileText: string) => void;
+		onFilesChanged: (fileName: string, fileText: File) => void;
 		class?: string;
 	} = $props();
 
@@ -23,9 +23,7 @@
 		const f = files[0];
 		labelText = `File: ${f.name}`;
 
-		f.text().then((txt) => {
-			onFilesChanged(f.name, txt);
-		});
+		onFilesChanged(f.name, f);
 	};
 </script>
 
