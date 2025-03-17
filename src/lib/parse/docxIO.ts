@@ -28,7 +28,6 @@ function forEachStringWithMatchingKey(object: any, key: string, fn: (s: string) 
   return object;
 }
 
-
 export class DocFile {
   /** 
    * @note #data is not updated past ctor, it's just used as a reference point

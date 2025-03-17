@@ -1,43 +1,45 @@
 <script lang="ts">
+	import { DocFile } from '$lib/parse/docxIO';
+	import { type UserData } from '$lib/state/userInput.svelte';
+	import { type Action } from 'svelte/action';
+
 	const {
-		text,
-		filename,
+		data,
 		class: className,
 		activeClass: inactiveClass
-	}: { text?: string; filename?: string; class?: string; activeClass?: string } = $props();
+	}: { data: UserData; class?: string; activeClass?: string } = $props();
 
-	let download: string = $derived.by(() => {
-		if (!filename) {
-			return 'compliant.txt';
+	let blobPromise: Promise<Blob> = $derived.by(async () => {
+		const t = await data.text;
+		if (t instanceof DocFile) {
+			return await t.getDataAsZip();
 		} else {
-			const splits = filename.split('.');
-			const ext = splits.length > 1 ? `.${splits.pop()}` : '';
-			const base = splits.join('.');
-			return `${base}.compliant${ext}`;
+			return new Blob([t], { type: 'text/plain' });
 		}
 	});
 
-	let href: string | undefined = $state();
-
-	$effect(() => {
-		if (!text) {
-			href = undefined;
-			return;
-		}
-
-		const blob = new Blob([text], { type: 'text/plain' });
-		href = URL.createObjectURL(blob);
-
-		return () => {
-			if (href) {
-				URL.revokeObjectURL(href);
-			}
-		};
+	let hrefPromise: Promise<string> = $derived.by(async () => {
+		return URL.createObjectURL(await blobPromise);
 	});
+
+	const linkLoad: Action<HTMLAnchorElement, string> = (_, data) => {
+		$effect(() => {
+			return () => {
+				const href = data;
+				if (href) {
+					URL.revokeObjectURL(href);
+				}
+			};
+		});
+	};
 </script>
 
-{#if href}
-	<a {href} {download} class={className}>Download {download}</a>
-{:else}
+{#await hrefPromise}
 	<div class={inactiveClass}>Waiting For Input...</div>
-{/if}
+{:then href}
+	<a use:linkLoad={href} {href} download={data.filename} class={className}>
+		Download {data.filename}
+	</a>
+{:catch err}
+	<div class={inactiveClass}>Got error preparing download: {err}</div>
+{/await}
