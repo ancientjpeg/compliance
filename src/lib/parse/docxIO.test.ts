@@ -3,6 +3,31 @@ import fs from 'fs/promises'
 import path from "path";
 import { DocFile } from "./docxIO";
 
+const getDocStrings = async (path: string): Promise<Array<string>> => {
+  const buf: Buffer = await fs.readFile(path);
+  const strings = new Array<string>();
+  const doc = new DocFile(new Blob([buf]));
+  await doc.forEachTextBlock((s: string) => {
+    strings.push(s);
+    return s;
+  });
+
+  return strings;
+}
+
+const fileExists = (path: string) => {
+
+  try {
+    fs.stat(path)
+  } catch (e: any) {
+    if (e.code !== "ENOENT") {
+      throw e
+    }
+    return false;
+  }
+  return true;
+}
+
 test("docx export operates as expected", async () => {
 
   const docPath = path.resolve('./src/lib/testData/docxParserTestData.docx');
@@ -12,12 +37,8 @@ test("docx export operates as expected", async () => {
   expect(docPath).not.toEqual(docPathOut);
   expect(docPath).not.toEqual(docPathComp);
 
-  try {
+  if (fileExists(docPathOut)) {
     await fs.rm(docPathOut);
-  } catch (e: any) {
-    if (e.code !== "ENOENT") {
-      throw e
-    }
   }
 
   const fbuf: Buffer = await fs.readFile(docPath)
@@ -30,15 +51,7 @@ test("docx export operates as expected", async () => {
 
   const outData = await docFile.getDataAsZip();
 
-  let compDataExists = true
-  try {
-    fs.stat(docPathComp)
-  } catch (e: any) {
-    if (e.code !== "ENOENT") {
-      throw e
-    }
-    return compDataExists = false;
-  }
+  let compDataExists = fileExists(docPathComp);
 
   /* jesus christ... now i see why they made deno */
   const data = Buffer.from(await outData.arrayBuffer());
@@ -47,20 +60,13 @@ test("docx export operates as expected", async () => {
     await fs.writeFile(docPathComp, data);
   }
 
-  const getDocStrings = async (path: string): Promise<Array<string>> => {
-    const buf: Buffer = await fs.readFile(path);
-    const strings = new Array<string>();
-    const doc = new DocFile(new Blob([buf]));
-    await doc.forEachTextBlock((s: string) => {
-      strings.push(s);
-      return s;
-    });
-
-    return strings;
-  }
 
 
   expect(await getDocStrings(docPathOut)).toStrictEqual(await getDocStrings(docPathComp));
 
+
+});
+
+test('stringReplace operates as expected with DocFile', () => {
 
 });
