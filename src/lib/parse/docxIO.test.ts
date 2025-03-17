@@ -2,6 +2,8 @@ import { test, expect } from "vitest";
 import fs from 'fs/promises'
 import path from "path";
 import { DocFile } from "./docxIO";
+import stringReplace from "$lib/stringReplace";
+import defaultReplacer from "$lib/defaultReplacer";
 
 const getDocStrings = async (path: string): Promise<Array<string>> => {
   const buf: Buffer = await fs.readFile(path);
@@ -15,10 +17,10 @@ const getDocStrings = async (path: string): Promise<Array<string>> => {
   return strings;
 }
 
-const fileExists = (path: string) => {
+const fileExists = async (path: string) => {
 
   try {
-    fs.stat(path)
+    await fs.stat(path)
   } catch (e: any) {
     if (e.code !== "ENOENT") {
       throw e
@@ -28,7 +30,8 @@ const fileExists = (path: string) => {
   return true;
 }
 
-test("docx export operates as expected", async () => {
+/** @todo refactor this tests to test more than just stringReplace */
+test("Docx export operates as expected with stringReplace", async () => {
 
   const docPath = path.resolve('./src/lib/testData/docxParserTestData.docx');
   const docPathOut = path.join(path.dirname(docPath), 'docxParserOutData.docx');
@@ -37,7 +40,7 @@ test("docx export operates as expected", async () => {
   expect(docPath).not.toEqual(docPathOut);
   expect(docPath).not.toEqual(docPathComp);
 
-  if (fileExists(docPathOut)) {
+  if (await fileExists(docPathOut)) {
     await fs.rm(docPathOut);
   }
 
@@ -51,7 +54,7 @@ test("docx export operates as expected", async () => {
 
   const outData = await docFile.getDataAsZip();
 
-  let compDataExists = fileExists(docPathComp);
+  let compDataExists = await fileExists(docPathComp);
 
   /* jesus christ... now i see why they made deno */
   const data = Buffer.from(await outData.arrayBuffer());
@@ -67,6 +70,3 @@ test("docx export operates as expected", async () => {
 
 });
 
-test('stringReplace operates as expected with DocFile', () => {
-
-});
