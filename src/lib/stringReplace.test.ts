@@ -5,7 +5,7 @@ import defaultReplacer from './defaultReplacer'
 test('stringReplace replaces all words in default replacer', async () => {
 
 
-  expect(defaultReplacer.get('advocates')).toBe('champions')
+  expect(defaultReplacer.get('advocates')).toBe('proponents')
 
   const capitalize = (s: string): string => {
     return s[0].toUpperCase() + s.slice(1)
@@ -17,7 +17,7 @@ test('stringReplace replaces all words in default replacer', async () => {
 
 
   for (const key of defaultReplacer.keys()) {
-    expect(key == key.toLowerCase()).toBeTruthy();
+    expect(key).toEqual(key.toLowerCase());
     expect(await stringReplace(key, defaultReplacer)).toBe(defaultReplacer.get(key))
     expect(await stringReplace(capitalize(key), defaultReplacer)).toBe(capitalize(defaultReplacer.get(key)!))
     expect(await stringReplace(antiCapitalize(key), defaultReplacer)).toBe(defaultReplacer.get(key))
