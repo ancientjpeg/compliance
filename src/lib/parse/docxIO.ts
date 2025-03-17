@@ -30,59 +30,50 @@ function forEachStringWithMatchingKey(object: any, key: string, fn: (s: string) 
 
 
 export class DocFile {
-  #zipFile: JSZip | null = null;
-  #fileData: Blob;
-  #xmlJObj: any;
-  #docPath: string
-  #xmlOptions: any
+  /** 
+   * @note #data is not updated past ctor, it's just used as a reference point
+   * when reconstructing the docx zip.
+   */
 
-  private constructor(fileData: Blob) {
-    this.#fileData = fileData;
-    this.#xmlJObj = null;
-    this.#docPath = 'word/document.xml';
-    this.#xmlOptions = {
-      ignoreAttributes: false,
-      attributeNamePrefix: "@_"
-    };
+  #data: Blob
+  #xmlJObj: any;
+  static #docPath: string = 'word/document.xml';
+  static #xmlOptions: any = {
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_"
+  };
+
+
+  private constructor(data: Blob, xmlJObj: any) {
+    this.#data = data;
+    this.#xmlJObj = xmlJObj;
+    this.#checkLoaded();
   }
 
+  /* Create a DocFile. Takes ownership of fileData. */
+  static async createDocFile(fileData: Blob): Promise<DocFile> {
 
-
-  /** 
-   * @brief Loads the passed docx file blob into memory by unzipping it
-   */
-  static async createDocFile(fileData: Blob) : Promise<DocFile> {
-    const d = new DocFile(fileData);
-
-    const data = await d.#fileData.arrayBuffer();
-    d.#zipFile = await JSZip.loadAsync(data);
-
-    /* TS doesn't know, but #zipFile is guaranteed to exist here */
-    const doc = d.#zipFile!.file(d.#docPath);
+    const zipFile = await JSZip.loadAsync(await fileData.arrayBuffer());
+    const doc = zipFile.file(DocFile.#docPath);
     if (doc === null) {
       throw Error("Unable to find expected document.xml in unzipped word doc");
     }
 
     const docTextPromise = doc.async('text');
-
-    const parser = new xml.XMLParser(d.#xmlOptions);
-
-    d.#xmlJObj = parser.parse(await docTextPromise);
-
-    if (!d.loaded) {
-      throw Error("XML parse failed");
-    }
-
-    return d;
-
+    const parser = new xml.XMLParser(DocFile.#xmlOptions);
+    const xmlObject: any = parser.parse(await docTextPromise);
+    return new DocFile(fileData, xmlObject);
   }
 
-  /** May throw iff `!this.loaded` */
-  async forEachTextBlock(fn: (s: string) => string) {
+  /** May throw iff `!this.loaded`. Returns a copy of `this` */
+  async forEachTextBlock(fn: (s: string) => string): Promise<DocFile> {
     this.#checkLoaded();
     /** TS compiler can't tell but this is guaranteed to exist now */
-    this.#xmlJObj = forEachStringWithMatchingKey(this.#xmlJObj, "w:t", fn);
-
+    const newData = this.#data.slice();
+    const newXml = JSON.parse(JSON.stringify(this.#xmlJObj));
+    const d = new DocFile(newData, newXml);
+    d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, "w:t", fn);
+    return d;
   }
 
   async getText() {
@@ -97,23 +88,20 @@ export class DocFile {
 
   async getDataAsZip(): Promise<Blob> {
     this.#checkLoaded();
-    const builder = new xml.XMLBuilder(this.#xmlOptions);
+    const builder = new xml.XMLBuilder(DocFile.#xmlOptions);
     const xmlDataString = builder.build(this.#xmlJObj);
-    this.#zipFile!.file(this.#docPath, xmlDataString);
-    return this.#zipFile!.generateAsync({ type: 'blob' });
 
-  }
+    const zipFile = await JSZip.loadAsync(await this.#data.arrayBuffer());
+    zipFile.file(DocFile.#docPath, xmlDataString);
+    return zipFile.generateAsync({ type: 'blob' });
 
-  get loaded(): boolean {
-    return this.#xmlJObj && Object.keys(this.#xmlJObj).length !== 0
   }
 
   #checkLoaded() {
-    if (!this.loaded) {
+    if (!this.#xmlJObj || Object.keys(this.#xmlJObj).length === 0) {
       throw new Error('DocFile is not loaded');
     }
   }
-
 
 }
 

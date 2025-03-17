@@ -47,9 +47,9 @@ test("Docx export operates as expected with stringReplace", async () => {
   const fbuf: Buffer = await fs.readFile(docPath)
   const docFile = await DocFile.createDocFile(new Blob([fbuf]));
 
-  await stringReplace(docFile, defaultReplacer);
+  const docFileReplaced = await stringReplace(docFile, defaultReplacer);
 
-  const outData = await docFile.getDataAsZip();
+  const outData = await docFileReplaced.getDataAsZip();
 
   let compDataExists = await fileExists(docPathComp);
 
