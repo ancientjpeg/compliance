@@ -73,14 +73,14 @@
 </script>
 
 <div
-	class={`bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-4 rounded-default flex flex-col ${className} overflow-hidden`}
+	class={`bg-white h-48 w-96 md:w-3/8 md:h-7/8 border-black border-2 rounded-default flex flex-col ${className} overflow-hidden`}
 >
 	{#if isInput}
 		<FileInput class={buttonSharedStyle} {onFilesChanged} />
 	{:else}
 		<FileOutput class={buttonSharedStyle} activeClass={buttonInactiveStyle} data={userOutput} />
 	{/if}
-	<div class="h-1 bg-black"></div>
+	<div class="h-0.5 bg-black"></div>
 	{#if isInput}
 		{#await inputMeta then meta}
 			<textarea

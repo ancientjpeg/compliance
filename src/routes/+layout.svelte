@@ -3,7 +3,7 @@
 	let { children } = $props();
 </script>
 
-<div class="h-screen flex justify-center items-center">
+<div class="h-screen w-screen absolute flex">
 	{@render children()}
 </div>
 

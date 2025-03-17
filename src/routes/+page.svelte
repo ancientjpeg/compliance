@@ -7,7 +7,9 @@
 	};
 </script>
 
-<div class="flex items-center justify-center flex-col w-95/100 h-95/100 border-4 border-black">
+<div
+	class="grow-1 flex items-center justify-center flex-col m-8 border-2 rounded-default border-black box-border"
+>
 	<h1 class="text-3xl grow-0 shrink-0 flex basis-36 items-center">&#x2728 compliance &#x2728</h1>
 	<p class="grow-1 basis-0 w-3/4 text-center">
 		is a text-replacement tool that scans your input text and replaces it using a pre-defined map of
@@ -20,7 +22,7 @@
 	</p>
 	<!-- <div class="grow-1 basis-0 my-auto flex justify-center items-center">
 		<button
-			class="h-12 md:w-72 w-48 border-black border-4 rounded-default hover:bg-gray-50"
+			class="h-12 md:w-72 w-48 border-black border-2 rounded-default hover:bg-gray-50"
 			onclick={togglePopup}>{(showPopup ? 'Hide' : 'Show') + ' replacement list'}</button
 		>
 	</div> -->
