@@ -4,8 +4,8 @@
 	import stringReplace from '$lib/stringReplace';
 	import FileInput from './FileInput.svelte';
 	import FileOutput from './FileOutput.svelte';
-
 	import { userInput } from '$lib/state/userInput.svelte';
+
 	let replacer = $state(defaultReplacer);
 
 	let {
