@@ -79,7 +79,7 @@ export class DocFile {
     this.#checkLoaded();
     let ret: string = '';
     await this.forEachTextBlock(s => {
-      ret += s;
+      ret += s + '\n';
       return s;
     });
     return ret;
