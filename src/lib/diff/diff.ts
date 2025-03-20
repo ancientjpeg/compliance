@@ -1,0 +1,3 @@
+import { huntSzymanskiTableConstructor } from "./huntSzymanski";
+
+
