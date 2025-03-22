@@ -1,13 +1,13 @@
 import { huntSzymanskiWithTable } from "./huntSzymanski";
 
 type DiffEntryMeta = {
-  text: string | undefined;
-  pos: number | undefined;
+  text: string | undefined; /* text of the diff */
+  pos: number | undefined; /* idx in the original string where the diff occurs */
 }
 export type DiffEntry = {
   added: DiffEntryMeta | undefined
   removed: DiffEntryMeta | undefined
-  begin: number;
+  begin: number; /* idx in the GCS where the diff occurs */
 }
 
 function diff(A: string, B: string): DiffEntry[] {
