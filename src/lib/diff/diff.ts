@@ -1,4 +1,4 @@
-import huntSzymanski from "./huntSzymanski";
+import { huntSzymanskiWithTable } from "./huntSzymanski";
 
 type DiffEntryMeta = {
   text: string | undefined;
@@ -11,7 +11,7 @@ export type DiffEntry = {
 }
 
 function diff(A: string, B: string): DiffEntry[] {
-  let lcs = huntSzymanski(A, B);
+  let lcs = huntSzymanskiWithTable(A, B);
   const table = lcs.table;
   let m = A.length, n = B.length;
   let i = m, j = n;
