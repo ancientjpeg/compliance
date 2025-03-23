@@ -23,9 +23,22 @@ type DiffString = {
   isAdded: boolean
 }
 
+export async function updateUserInput(text: string | DocFile, filename: string | undefined = undefined) {
+  console.log(`UPDATE ${filename}`);
+  const isDoc = text instanceof DocFile; 
+
+  if (isDoc) {
+    userInput.doc = text;
+    userInput.text = await text.getText()
+  } else {
+    userInput.text = text;
+    userInput.doc = undefined;
+  }
+
+  userInput.filename = filename;
+}
+
 function createDiffStrings(postString: string, diffEntries: DiffEntry[]): DiffString[] {
-
-
   let diffStrings: DiffString[] = []
   let nextToAdd: number = 0;
 
@@ -52,18 +65,19 @@ function createDiffStrings(postString: string, diffEntries: DiffEntry[]): DiffSt
 }
 
 
-type TransformType = {
+/** TODO refactor */
+export type UserDataOutput = {
   text: Promise<UserText>;
   filename: string
   diff: DiffString[]
 };
 
-export async function transformToOutput(input: UserData, replacer: Replacer): Promise<TransformType> {
+export async function transformToOutput(input: UserData, replacer: Replacer): Promise<UserDataOutput> {
   const getTextAsString = async (t: UserText): Promise<string> => t instanceof DocFile ? await t.getText() : t;
   
   const finalTextPromise = stringReplace(input.text, replacer);
 
-  const textAsString = await getTextAsString(await input.text)
+  const textAsString = await getTextAsString(input.text)
   const finalTextAsString = await getTextAsString(await finalTextPromise)
 
   const filename = getOutputFilename(input.filename);

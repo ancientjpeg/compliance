@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { DocFile } from '$lib/parse/docxIO';
-	import { type UserData } from '$lib/state/userInput.svelte';
+	import { type UserDataOutput } from '$lib/state/UserIO';
 	import { type Action } from 'svelte/action';
 
 	const {
 		data,
 		class: className,
 		activeClass: inactiveClass
-	}: { data: UserData; class?: string; activeClass?: string } = $props();
+	}: { data: UserDataOutput; class?: string; activeClass?: string } = $props();
 
 	let blobPromise: Promise<Blob> = $derived.by(async () => {
 		const t = await data.text;
