@@ -1,17 +1,12 @@
 <script lang="ts">
-	import {
-		defaultInput,
-		defaultOutput,
-		userOutput,
-		userInput,
-		getOutputFilename,
-		type UserText
-	} from '$lib/state/userInput.svelte';
+	import { userInput } from '$lib/state/userInput.svelte';
+	import { transformToOutput } from '$lib/state/UserIO';
 	import defaultReplacer from '$lib/defaultReplacer';
 	import stringReplace from '$lib/stringReplace';
 	import FileInput from './FileInput.svelte';
 	import FileOutput from './FileOutput.svelte';
 	import { DocFile } from '$lib/parse/docxIO';
+	import { type UserData } from '$lib/state/userInput.svelte';
 
 	let replacer = $state(defaultReplacer);
 
@@ -31,12 +26,12 @@
 			userInput.text = fileData.text();
 		}
 		userInput.filename = fileName;
-		userOutput.text = stringReplace(userInput.text, replacer);
-		userOutput.filename = getOutputFilename(userInput.filename);
 	};
 
+	const userOutput = $derived.by(async () => await transformToOutput(userInput, defaultReplacer));
+
 	const inputText: Promise<string> = $derived.by(async () => {
-		const text: UserText = await userInput.text;
+		const text = await userInput.text;
 		if (text instanceof DocFile) {
 			return await text.getText();
 		}
@@ -46,14 +41,6 @@
 	const inputMeta = $derived.by(async () =>
 		Promise.all([(await userInput.text) instanceof DocFile, inputText])
 	);
-
-	const outputText: Promise<string> = $derived.by(async () => {
-		const text: UserText = await userOutput.text;
-		if (text instanceof DocFile) {
-			return await text.getText();
-		}
-		return text;
-	});
 
 	/** TODO refactor this so the buttons have a shared class */
 	const buttonInactiveStyle = 'h-8 flex justify-center items-center';
@@ -67,7 +54,7 @@
 			console.error('IMPLEMENT DOC DIFFER!');
 			return;
 		} else {
-			userOutput.text = stringReplace(newText, replacer);
+			userInput.text = newText;
 		}
 	};
 </script>
@@ -78,13 +65,15 @@
 	{#if isInput}
 		<FileInput class={buttonSharedStyle} {onFilesChanged} />
 	{:else}
-		<FileOutput class={buttonSharedStyle} activeClass={buttonInactiveStyle} data={userOutput} />
+		{#await userOutput then output}
+			<FileOutput class={buttonSharedStyle} activeClass={buttonInactiveStyle} data={output} />
+		{/await}
 	{/if}
 	<div class="h-0.5 bg-black"></div>
 	{#if isInput}
 		{#await inputMeta then meta}
 			<textarea
-				placeholder={defaultInput}
+				placeholder={'Input your text here.'}
 				class={textBoxSharedStyle}
 				oninput={onTextBoxChange}
 				value={meta[1]}
@@ -94,9 +83,16 @@
 			<p class={textBoxSharedStyle}>Caught error: {err}</p>
 		{/await}
 	{:else}
-		{#await outputText then text}
-			<textarea placeholder={defaultOutput} class={textBoxSharedStyle} value={text} disabled={true}
-			></textarea>
+		{#await userOutput then output}
+			<p placeholder={'Text will output here.'} class={textBoxSharedStyle}>
+				{#each output.diff as diffEntry}
+					{#if diffEntry.isAdded}
+						<span class="text-red-500">{diffEntry.text}</span>
+					{:else}
+						{diffEntry.text}
+					{/if}
+				{/each}
+			</p>
 		{/await}
 	{/if}
 </div>

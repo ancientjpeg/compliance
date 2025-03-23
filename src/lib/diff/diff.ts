@@ -1,8 +1,8 @@
 import { huntSzymanskiWithTable } from "./huntSzymanski";
 
 type DiffEntryMeta = {
-  text: string | undefined; /* text of the diff */
-  pos: number | undefined; /* idx in the original string where the diff occurs */
+  text: string; /* text of the diff */
+  pos: number; /* idx in the original string where the diff occurs */
 }
 export type DiffEntry = {
   added: DiffEntryMeta | undefined
