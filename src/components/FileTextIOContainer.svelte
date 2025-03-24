@@ -1,19 +1,10 @@
 <script lang="ts">
-	import {
-		defaultInput,
-		defaultOutput,
-		userOutput,
-		userInput,
-		getOutputFilename,
-		type UserText
-	} from '$lib/state/userInput.svelte';
+	import { userInput } from '$lib/state/userInput.svelte';
+	import { transformToOutput, updateUserInput } from '$lib/state/UserIO';
 	import defaultReplacer from '$lib/defaultReplacer';
-	import stringReplace from '$lib/stringReplace';
 	import FileInput from './FileInput.svelte';
 	import FileOutput from './FileOutput.svelte';
 	import { DocFile } from '$lib/parse/docxIO';
-
-	let replacer = $state(defaultReplacer);
 
 	let {
 		isInput,
@@ -23,53 +14,23 @@
 		class?: string;
 	} = $props();
 
-	const onFilesChanged = (fileName: string, fileData: Blob) => {
+	const onFilesChanged = async (fileName: string, fileData: Blob) => {
 		const ext = fileName.split('.').pop();
+		let text: DocFile | string;
 		if (ext == 'docx') {
-			userInput.text = DocFile.createDocFile(fileData);
+			text = await DocFile.createDocFile(fileData);
 		} else {
-			userInput.text = fileData.text();
+			text = await fileData.text();
 		}
-		userInput.filename = fileName;
-		userOutput.text = stringReplace(userInput.text, replacer);
-		userOutput.filename = getOutputFilename(userInput.filename);
+		updateUserInput(text, fileName);
 	};
 
-	const inputText: Promise<string> = $derived.by(async () => {
-		const text: UserText = await userInput.text;
-		if (text instanceof DocFile) {
-			return await text.getText();
-		}
-		return text;
-	});
-
-	const inputMeta = $derived.by(async () =>
-		Promise.all([(await userInput.text) instanceof DocFile, inputText])
-	);
-
-	const outputText: Promise<string> = $derived.by(async () => {
-		const text: UserText = await userOutput.text;
-		if (text instanceof DocFile) {
-			return await text.getText();
-		}
-		return text;
-	});
+	const userOutput = $derived.by(async () => await transformToOutput(userInput, defaultReplacer));
 
 	/** TODO refactor this so the buttons have a shared class */
 	const buttonInactiveStyle = 'h-8 flex justify-center items-center';
 	const buttonSharedStyle = `${buttonInactiveStyle} active:bg-gray-400 hover:bg-gray-200`;
-	const textBoxSharedStyle = 'grow-1 basis-0 overflow-scroll resize-none p-4';
-
-	const onTextBoxChange = async (e: Event) => {
-		const newText = (e.target as any).value;
-		const t = await userInput.text;
-		if (t instanceof DocFile) {
-			console.error('IMPLEMENT DOC DIFFER!');
-			return;
-		} else {
-			userOutput.text = stringReplace(newText, replacer);
-		}
-	};
+	const textBoxSharedStyle = 'grow-1 basis-0 overflow-scroll resize-none p-4 text-neutral-400';
 </script>
 
 <div
@@ -78,25 +39,29 @@
 	{#if isInput}
 		<FileInput class={buttonSharedStyle} {onFilesChanged} />
 	{:else}
-		<FileOutput class={buttonSharedStyle} activeClass={buttonInactiveStyle} data={userOutput} />
+		{#await userOutput then output}
+			<FileOutput class={buttonSharedStyle} activeClass={buttonInactiveStyle} data={output} />
+		{/await}
 	{/if}
 	<div class="h-0.5 bg-black"></div>
 	{#if isInput}
-		{#await inputMeta then meta}
-			<textarea
-				placeholder={defaultInput}
-				class={textBoxSharedStyle}
-				oninput={onTextBoxChange}
-				value={meta[1]}
-				disabled={meta[0]}
-			></textarea>
-		{:catch err}
-			<p class={textBoxSharedStyle}>Caught error: {err}</p>
-		{/await}
+		<textarea
+			placeholder={'Input your text here.'}
+			class={`${textBoxSharedStyle} enabled:text-black`}
+			bind:value={userInput.text}
+			disabled={userInput.doc !== undefined}
+		></textarea>
 	{:else}
-		{#await outputText then text}
-			<textarea placeholder={defaultOutput} class={textBoxSharedStyle} value={text} disabled={true}
-			></textarea>
+		{#await userOutput then output}
+			<p placeholder={'Text will output here.'} class={textBoxSharedStyle}>
+				{#each output.diff as diffEntry}
+					{#if diffEntry.isAdded}
+						<span class="text-red-500">{diffEntry.text}</span>
+					{:else}
+						{diffEntry.text}
+					{/if}
+				{/each}
+			</p>
 		{/await}
 	{/if}
 </div>
