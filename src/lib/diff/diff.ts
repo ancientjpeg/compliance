@@ -1,55 +1,47 @@
 import { huntSzymanskiWithTable } from "./huntSzymanski";
 
-export function greedyDiff(A: string, B: string): number {
-  const M = A.length;
-  const N = B.length;
-  const MAX = M + N;
+/**
+ * @brief An implementation of 
+ * [Myers' diff algorithm](http://www.xmailserver.org/diff2.pdf).
+ * 
+ * @param A - Original string
+ * @param B - New string
+ */
+export function myersDiff(A: string, B: string): number {
 
-  let V = Array.from({ length: MAX * 2 + 1 }, (_, i) => i - MAX);
-  let V1 = Array.from({ length: MAX * 2 + 1 }, (_, i) => i - MAX);
+  const N = A.length;
+  const M = B.length;
+  const MAX = N + M;
+  const ARRSIZE = Math.ceil((N + M) / 2);
+  const DELTA = N - M; /* k == DELTA for point (N, M) */
 
-  V[MAX + 1] = 0;
-  console.log(V);
 
-  for (let D = 0; D <= MAX; ++D) {
+
+  /** 
+   * The `V` arrays store the x-coordinate of the longest reaching paths for
+   * diagonal `k` in `V[k + ARRSIZE]`. There is one forward and one backward
+   * array.
+   */
+  const genArray = () => Array.from({ length: ARRSIZE * 2 + 1 }, (_, i) => Math.max(0, i - ARRSIZE));
+  let Vf = genArray();
+  let Vb = genArray();
+  console.log(Vf);
+  console.assert(Vf == Vb);
+
+
+  for (let D = 0; D <= ARRSIZE; ++D) {
     for (let k = -D; k <= D; k += 2) {
-
-      let x, y, u, v;
-      {
-        const k_ind = k + MAX;
-        if ((k == 0 || k != D) && (V[k_ind - 1] ?? -1) < V[k_ind + 1]) {
-          x = V[k_ind + 1];
-        } else {
-          x = V[k_ind - 1] + 1;
-        }
-        y = x - k; // by definition
-
-        while (x < N && y < M && B.at(x) == A.at(y)) {
-          ++x;
-          ++y;
-        }
-        V[k_ind] = x;
-
-      }
-
-      {
-        const k_ind = k + MAX;
-        if ((k == 0 || k != D) && (V1[k_ind - 1] ?? -1) < V[k_ind + 1]) {
-          u = V1[k_ind + 1];
-        } else {
-          u = V1[k_ind - 1] + 1;
-        }
-        v = u - k; // by definition
-
-        while (x < N && y < M && B.at(x) == A.at(y)) {
-          ++x;
-          ++y;
-        }
-        V1[k_ind] = x;
-
-      }
+      console.log("FORWARD ITERATION:")
+      console.log({ D, k })
+    }
+    for (let k = -D; k <= D; k += 2) {
+      console.log("REVERSE ITERATION:")
+      k += DELTA
+      console.log({ D, k })
     }
   }
+
+
 
   throw new Error("greedy diff algorithm has a logic error")
 }
@@ -127,7 +119,6 @@ function diff(A: string, B: string): DiffEntry[] {
         pos: i
       };
 
-      console.log(`removed '${JSON.stringify(entry.removed)}' at gcs pos ${pos}`);
       aDiff = []
     }
 
@@ -136,7 +127,6 @@ function diff(A: string, B: string): DiffEntry[] {
         text: bDiff.reverse().join(''),
         pos: j
       };
-      console.log(`added '${JSON.stringify(entry.added)}' at gcs pos ${pos}`);
       bDiff = []
     }
 
