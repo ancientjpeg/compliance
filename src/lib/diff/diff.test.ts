@@ -15,8 +15,14 @@ test("diff algorithm returns expected values", async () => {
 
 
 test("greedy diff algo", () => {
-  expect(greedyDiffSimple("ac", "dc")).toBe(2);
+  // expect(greedyDiffSimple("ac", "dc")).toBe(2);
+  // expect(greedyDiffSimple("acdc", "cd")).toBe(2);
+  // expect(myersDiff("acdc", "cd")).toBe(2);
+  // expect(myersDiff("acd", "cd")).toBe(1);
+  // expect(greedyDiffSimple("The cat in the hat.", "The frog on the log.")).toBe(15);
+  expect(myersDiff("The cat in the hat.", "The frog on the log")).toBe(16);
   // expect(myersDiff("ac", "dc")).toBe(2);
+  // expect(myersDiff("wraith", "dais")).toBe(5);
   // expect(greedyDiffSimple("charter", "scar")).toBe(5);
   // expect(greedyDiffSimple("scar", "charter")).toBe(5);
   // expect(greedyDiffSimple("bcience", "science")).toBe(2);

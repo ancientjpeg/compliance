@@ -11,9 +11,9 @@ export function myersDiff(A: string, B: string): number {
 
   const N = A.length;
   const M = B.length;
-  const MAX = N + M;
-  const ARRSIZE = Math.ceil((N + M) / 2);
+  const D_MAX = Math.ceil((N + M) / 2);
   const DELTA = N - M; /* k == DELTA for point (N, M) */
+  const DELTA_EVEN = (DELTA & 1) == 0;
 
 
 
@@ -22,26 +22,79 @@ export function myersDiff(A: string, B: string): number {
    * diagonal `k` in `V[k + ARRSIZE]`. There is one forward and one backward
    * array.
    */
-  const genArray = () => Array.from({ length: ARRSIZE * 2 + 1 }, (_, i) => Math.max(0, i - ARRSIZE));
-  let Vf = genArray();
-  let Vb = genArray();
-  console.log(Vf);
-  console.assert(Vf == Vb);
+  let Vf = Array.from({ length: D_MAX * 2 + 1 }, (_, i) => Math.min(0, i - D_MAX));
+  let Vb = Array.from({ length: D_MAX * 2 + 1 }, (_, i) => Math.max(0, i - D_MAX) + N);
 
 
-  for (let D = 0; D <= ARRSIZE; ++D) {
+
+  for (let D = 0; D <= D_MAX; ++D) {
     for (let k = -D; k <= D; k += 2) {
-      console.log("FORWARD ITERATION:")
-      console.log({ D, k })
+
+      const k_ind = k + D_MAX
+      const fr_below = Vf[k_ind - 1] ?? -1;
+      const fr_above = Vf[k_ind + 1] ?? -1;
+
+      let x;
+      if (fr_below < fr_above) {
+        x = fr_above;
+      } else {
+        x = fr_below + 1;
+      }
+
+
+      let y = x - k;
+
+
+      while (A.at(x) == B.at(y) && x < N && y < M) {
+        ++x;
+        ++y;
+      }
+
+      Vf[k_ind] = x;
+
+
+      if (!DELTA_EVEN && Math.abs(k - DELTA) <= (D - 1)) {
+        const idx_r = k_ind - DELTA;
+        const x_r = Vb[idx_r];
+        if (x_r <= x) {
+          return 2 * D - 1;
+        }
+      }
     }
-    for (let k = -D; k <= D; k += 2) {
-      console.log("REVERSE ITERATION:")
-      k += DELTA
-      console.log({ D, k })
+
+    for (let k = -D + DELTA; k <= D + DELTA; k += 2) {
+
+      const k_ind = k + D_MAX - DELTA
+      const fr_below = Vb[k_ind - 1] ?? Number.MAX_SAFE_INTEGER;
+      const fr_above = Vb[k_ind + 1] ?? Number.MAX_SAFE_INTEGER;
+
+      let u;
+      if (fr_below < fr_above) {
+        u = fr_below;
+      } else {
+        u = fr_above - 1;
+      }
+
+
+      let v = u - k;
+
+
+      while (A.at(u - 1) == B.at(v - 1) && u > 0 && v > 0) {
+        --u;
+        --v;
+      }
+
+      Vb[k_ind] = u;
+
+      if (DELTA_EVEN && Math.abs(k) <= D) {
+        const idx_f = k_ind + DELTA;
+        const x_f = Vf[idx_f];
+        if (x_f >= u) {
+          return 2 * D;
+        }
+      }
     }
   }
-
-
 
   throw new Error("greedy diff algorithm has a logic error")
 }
@@ -169,6 +222,5 @@ function diff(A: string, B: string): DiffEntry[] {
 
   return entries.reverse();
 }
-
 
 export default diff;
