@@ -1,3 +1,5 @@
+import type { HSResult, HSDynamicTable } from "./diff.d";
+
 function huntSzymanski(A: string, B: string): number {
   const rowSize = B.length + 1;
   let rows: [number[], number[]] = [Array(rowSize).fill(0), Array(rowSize).fill(0)];
@@ -37,12 +39,6 @@ function huntSzymanski(A: string, B: string): number {
 
   return rows[1][rowSize - 1]
 }
-
-type HSDynamicTable = number[][];
-type HSResult = {
-  lcsLength: number;
-  table: HSDynamicTable;
-};
 
 export function huntSzymanskiWithTable(A: string, B: string): HSResult {
   let table: HSDynamicTable = Array.from({ length: A.length + 1 }, () => Array(B.length + 1).fill(-1));;
