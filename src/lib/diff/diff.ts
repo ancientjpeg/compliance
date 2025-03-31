@@ -1,12 +1,12 @@
 import { huntSzymanskiWithTable } from "./huntSzymanski";
 
-enum DiffChunkOp {
+export enum DiffChunkOp {
   Equal,
   Insert,
   Delete
 }
 
-type DiffChunk = {
+export type DiffChunk = {
   op: DiffChunkOp;
   data: string;
 };
@@ -17,8 +17,9 @@ type Snake = {
   begin: number;
   end: number;
   k: number;
+  D: number;
 }
-const createSnake = (begin: number, end: number, k: number): Snake => ({ begin, end, k })
+const createSnake = (begin: number, end: number, k: number, D: number): Snake => ({ begin, end, k, D })
 
 /** 
  * We are hoping and praying that the JS engine is smart enough to turn these string slices into references.
@@ -74,7 +75,7 @@ export function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefine
         const idx_r = k_ind - DELTA;
         const x_r = Vb[idx_r]!;
         if (x_r <= x) {
-          return createSnake(x_r, x, k);
+          return createSnake(x_r, x, k, 2 * D - 1);
         }
       }
     }
@@ -107,7 +108,7 @@ export function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefine
         const idx_f = k_ind + DELTA;
         const x_f = Vf[idx_f]!;
         if (x_f >= u) {
-          return createSnake(u, x_f, k);
+          return createSnake(u, x_f, k, 2 * D);
         }
       }
     }
@@ -118,16 +119,36 @@ export function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefine
 }
 
 function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): DiffChunk[] {
+
   let chunks: DiffChunk[] = []
 
-  if (B.length == 0) {
+  if (A.length == 0 && B.length == 0) {
+    return chunks;
+  } else if (B.length == 0) {
     return [createDiffChunk(DiffChunkOp.Delete, A)]
   } else if (A.length == 0) {
     return [createDiffChunk(DiffChunkOp.Insert, B)]
   }
 
-
   const snake = myersGetMiddleSnake(A, B, Vf, Vb);
+  if (snake.D <= 1) {
+    if (A.length == B.length) {
+      return [createDiffChunk(DiffChunkOp.Equal, A)];
+    }
+
+    const Aless = A.length < B.length;
+    let op = Aless ? DiffChunkOp.Insert : DiffChunkOp.Delete
+
+    const target_idx = Aless ? (snake.begin - snake.k) - 1 : snake.begin - 1;
+    const target_str = Aless ? B : A;
+
+    const before = createDiffChunk(DiffChunkOp.Equal, target_str.slice(0, target_idx));
+    const target = createDiffChunk(op, target_str.at(target_idx)!);
+    const after = createDiffChunk(DiffChunkOp.Equal, target_str.slice(target_idx + 1));
+
+    return [before, target, after].filter(el => el.data.length > 0);
+  }
+
   const begin_y = snake.begin - snake.k;
   const end_y = snake.end - snake.k;
 
@@ -135,7 +156,6 @@ function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb:
   const B0 = B.slice(0, begin_y);
   const A1 = A.slice(snake.end);
   const B1 = B.slice(end_y);
-
 
   chunks.push(...myersDiffInternal(A0, B0, Vf, Vb));
   if (snake.begin != snake.end) {
