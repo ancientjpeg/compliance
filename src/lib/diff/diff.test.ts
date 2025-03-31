@@ -25,5 +25,6 @@ test("greedy diff algo", () => {
   expect(getSnake("abc", "zbcz")).toStrictEqual({ begin: 1, end: 3, k: 0 });
 
   const chunks = myersDiff("abcd", "zbczz")
+  console.log(chunks);
   expect(chunks.length).toBe(5)
 })

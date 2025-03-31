@@ -132,8 +132,8 @@ function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb:
   const begin_y = snake.begin - snake.k;
   const end_y = snake.end - snake.k;
 
-  const A0 = A.slice(0, snake.begin + 1);
-  const B0 = B.slice(0, begin_y + 1);
+  const A0 = A.slice(0, snake.begin);
+  const B0 = B.slice(0, begin_y);
   const A1 = A.slice(snake.end);
   const B1 = B.slice(end_y);
 
@@ -141,7 +141,7 @@ function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb:
 
   chunks.push(...myersDiffInternal(A0, B0, Vf, Vb));
   if (snake.begin != snake.end) {
-    chunks.push(createDiffChunk(DiffChunkOp.Equal, A.slice(snake.begin + 1, snake.end)));
+    chunks.push(createDiffChunk(DiffChunkOp.Equal, A.slice(snake.begin, snake.end)));
   }
   chunks.push(...myersDiffInternal(A1, B1, Vf, Vb));
 
