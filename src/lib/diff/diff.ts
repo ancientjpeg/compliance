@@ -118,7 +118,6 @@ export function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefine
 }
 
 function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): DiffChunk[] {
-  console.log("INTERNAL ITERATION")
   let chunks: DiffChunk[] = []
 
   if (B.length == 0) {
@@ -137,7 +136,6 @@ function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb:
   const A1 = A.slice(snake.end);
   const B1 = B.slice(end_y);
 
-  console.log({ A0, B0, A1, B1, snake });
 
   chunks.push(...myersDiffInternal(A0, B0, Vf, Vb));
   if (snake.begin != snake.end) {
@@ -145,7 +143,6 @@ function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb:
   }
   chunks.push(...myersDiffInternal(A1, B1, Vf, Vb));
 
-  console.log({ chunks })
   return chunks;
 }
 
