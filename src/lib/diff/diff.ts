@@ -1,64 +1,5 @@
 import { huntSzymanskiWithTable } from "./huntSzymanski";
 
-enum DiffChunkOp {
-  Equal,
-  Insert,
-  Delete
-}
-
-type DiffChunk = {
-  op: DiffChunkOp;
-  data: string;
-};
-
-
-
-type Region = {
-  x0: number;
-  k0: number;
-  x1: number;
-  k1: number;
-  isEdgeOrSnake: boolean;
-}
-
-/* Any straight path in the graph - vertical, horizontal, or diagonal. */
-type EdgeOrSnake = Region & { op: DiffChunkOp };
-
-const createRegion = (x0: number, k0: number, x1: number, k1: number): Region => ({ x0, k0, x1, k1, isEdgeOrSnake: false });
-
-const createRegionOrEdgeOrSnake = (x0: number, k0: number, x1: number, k1: number): Region | EdgeOrSnake => {
-
-  const isSnake = k0 == k1
-  const isDelete = !isSnake && x0 == x1;
-  const isInsert = !isSnake && (x0 - k0) == (x1 - k1)
-
-  if (!isSnake && !isDelete && !isInsert) {
-    return createRegion(x0, k0, x1, k1);
-  }
-
-  let op = DiffChunkOp.Equal;
-  if (isDelete) {
-    op = DiffChunkOp.Delete;
-  } else if (isInsert) {
-    op = DiffChunkOp.Insert;
-  }
-
-  return { x0, k0, x1, k1, isEdgeOrSnake: false, op };
-
-}
-
-const createEdgeOrSnake = (x0: number, k0: number, x1: number, k1: number) => {
-
-  const ret = createRegionOrEdgeOrSnake(x0, k0, x1, k1);
-
-  if (!ret.isEdgeOrSnake) {
-    throw new Error("Passed a D-path when a snake/N-length edge was expected.");
-  }
-
-  return ret;
-}
-
-
 /**
  * @brief An implementation of 
  * [Myers' diff algorithm](http://www.xmailserver.org/diff2.pdf).
@@ -66,41 +7,7 @@ const createEdgeOrSnake = (x0: number, k0: number, x1: number, k1: number) => {
  * @param A - Original string
  * @param B - New string
  */
-export function myersDiff(A: string, B: string) {
-
-  /****************************************************************************/
-  /****************************  INITIALIZATION  ******************************/
-  /****************************************************************************/
-  const TOP_N = A.length;
-  const TOP_M = B.length;
-  const TOP_D_MAX = Math.ceil((TOP_N + TOP_M) / 2);
-
-  /** 
-   * The `V` arrays store the x-coordinate of the longest reaching paths for
-   * diagonal `k` in `V[k + ARRSIZE]`. There is one forward and one backward
-   * array.
-   */
-  let Vf: (number | undefined)[] = Array.from({ length: TOP_D_MAX * 2 + 1 });
-  let Vb = [...Vf];
-
-
-  let unexploredRegions: EdgeOrSnake[] = []
-  unexploredRegions.push(createRegion(0, 0, TOP_N, TOP_M))
-  let region = unexploredRegions[0];
-
-  const getNextRegionWithFoundSnake = (edgeOrSnake: EdgeOrSnake) => {
-    const isSnake = edgeOrSnake.k0 == edgeOrSnake.k1
-    const isDelete = !isSnake && edgeOrSnake.x0 == edgeOrSnake.x1;
-    const isInsert = !isSnake && (edgeOrSnake.x0 - edgeOrSnake.k0) == (edgeOrSnake.x1 - edgeOrSnake.k1)
-
-    if (!isSnake || !isDelete || !isInsert) {
-      throw new Error("Passed a D-path when a snake/N-length edge was expected.");
-    }
-  }
-
-  /****************************************************************************/
-  /**********************  OUTER LOOP INITIALIZATION  *************************/
-  /****************************************************************************/
+export function myersDiff(A: string, B: string): number {
 
   const N = A.length;
   const M = B.length;
@@ -110,9 +17,17 @@ export function myersDiff(A: string, B: string) {
 
 
 
+  /** 
+   * The `V` arrays store the x-coordinate of the longest reaching paths for
+   * diagonal `k` in `V[k + ARRSIZE]`. There is one forward and one backward
+   * array.
+   */
+  let Vf = Array.from({ length: D_MAX * 2 + 1 }, (_, i) => Math.min(0, i - D_MAX));
+  let Vb = Array.from({ length: D_MAX * 2 + 1 }, (_, i) => Math.max(0, i - D_MAX) + N);
+
+
 
   for (let D = 0; D <= D_MAX; ++D) {
-
     for (let k = -D; k <= D; k += 2) {
 
       const k_ind = k + D_MAX
@@ -142,6 +57,7 @@ export function myersDiff(A: string, B: string) {
         const idx_r = k_ind - DELTA;
         const x_r = Vb[idx_r];
         if (x_r <= x) {
+          return 2 * D - 1;
         }
       }
     }
