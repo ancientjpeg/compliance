@@ -1,49 +1,66 @@
 import { huntSzymanskiWithTable } from "./huntSzymanski";
 
-/**
- * @brief An implementation of 
- * [Myers' diff algorithm](http://www.xmailserver.org/diff2.pdf).
- * 
- * @param A - Original string
- * @param B - New string
+enum DiffChunkOp {
+  Equal,
+  Insert,
+  Delete
+}
+
+type DiffChunk = {
+  op: DiffChunkOp;
+  data: string;
+};
+
+const createDiffChunk = (op: DiffChunkOp, data: string): DiffChunk => ({ op, data });
+
+type Snake = {
+  begin: number;
+  end: number;
+  k: number;
+}
+const createSnake = (begin: number, end: number, k: number): Snake => ({ begin, end, k })
+
+/** 
+ * We are hoping and praying that the JS engine is smart enough to turn these string slices into references.
+ * If that doesn't happen, it honestly might be worth just writing this in Rust/C++ because memory efficiency
+ * is kind of a lost cause in JS.
  */
-export function myersDiff(A: string, B: string): number {
+export function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): Snake {
 
   const N = A.length;
   const M = B.length;
   const D_MAX = Math.ceil((N + M) / 2);
   const DELTA = N - M; /* k == DELTA for point (N, M) */
   const DELTA_EVEN = (DELTA & 1) == 0;
-
-
+  const ARR_LENGTH = D_MAX * 2 + 1;
 
   /** 
    * The `V` arrays store the x-coordinate of the longest reaching paths for
    * diagonal `k` in `V[k + ARRSIZE]`. There is one forward and one backward
    * array.
    */
-  let Vf = Array.from({ length: D_MAX * 2 + 1 }, (_, i) => Math.min(0, i - D_MAX));
-  let Vb = Array.from({ length: D_MAX * 2 + 1 }, (_, i) => Math.max(0, i - D_MAX) + N);
+  if (Vf.length < ARR_LENGTH || Vb.length < ARR_LENGTH) {
+    throw new Error("D-path tracker arrays not allocated properly")
+  }
 
-
+  Vf[D_MAX + 1] = 0;
+  Vb[D_MAX - 1] = N;
 
   for (let D = 0; D <= D_MAX; ++D) {
     for (let k = -D; k <= D; k += 2) {
 
       const k_ind = k + D_MAX
-      const fr_below = Vf[k_ind - 1] ?? -1;
-      const fr_above = Vf[k_ind + 1] ?? -1;
+      const Vf_below = Vf[k_ind - 1]!;
+      const Vf_above = Vf[k_ind + 1]!;
 
       let x;
-      if (fr_below < fr_above) {
-        x = fr_above;
+      if (k == -D || k != D && Vf_below < Vf_above) {
+        x = Vf_above;
       } else {
-        x = fr_below + 1;
+        x = Vf_below + 1;
       }
 
-
       let y = x - k;
-
 
       while (A.at(x) == B.at(y) && x < N && y < M) {
         ++x;
@@ -55,9 +72,9 @@ export function myersDiff(A: string, B: string): number {
 
       if (!DELTA_EVEN && Math.abs(k - DELTA) <= (D - 1)) {
         const idx_r = k_ind - DELTA;
-        const x_r = Vb[idx_r];
+        const x_r = Vb[idx_r]!;
         if (x_r <= x) {
-          return 2 * D - 1;
+          return createSnake(x_r, x, k);
         }
       }
     }
@@ -65,14 +82,14 @@ export function myersDiff(A: string, B: string): number {
     for (let k = -D + DELTA; k <= D + DELTA; k += 2) {
 
       const k_ind = k + D_MAX - DELTA
-      const fr_below = Vb[k_ind - 1] ?? Number.MAX_SAFE_INTEGER;
-      const fr_above = Vb[k_ind + 1] ?? Number.MAX_SAFE_INTEGER;
+      const Vb_below = Vb[k_ind - 1]!;
+      const Vb_above = Vb[k_ind + 1]!;
 
       let u;
-      if (fr_below < fr_above) {
-        u = fr_below;
+      if (k == (D + DELTA) || k != (-D + DELTA) && Vb_below < Vb_above) {
+        u = Vb_below;
       } else {
-        u = fr_above - 1;
+        u = Vb_above - 1;
       }
 
 
@@ -88,15 +105,69 @@ export function myersDiff(A: string, B: string): number {
 
       if (DELTA_EVEN && Math.abs(k) <= D) {
         const idx_f = k_ind + DELTA;
-        const x_f = Vf[idx_f];
+        const x_f = Vf[idx_f]!;
         if (x_f >= u) {
-          return 2 * D;
+          return createSnake(u, x_f, k);
         }
       }
     }
   }
 
   throw new Error("greedy diff algorithm has a logic error")
+
+}
+
+function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): DiffChunk[] {
+  console.log("INTERNAL ITERATION")
+  let chunks: DiffChunk[] = []
+
+  if (B.length == 0) {
+    return [createDiffChunk(DiffChunkOp.Delete, A)]
+  } else if (A.length == 0) {
+    return [createDiffChunk(DiffChunkOp.Insert, B)]
+  }
+
+
+  const snake = myersGetMiddleSnake(A, B, Vf, Vb);
+  const begin_y = snake.begin - snake.k;
+  const end_y = snake.end - snake.k;
+
+  const A0 = A.slice(0, snake.begin + 1);
+  const B0 = B.slice(0, begin_y + 1);
+  const A1 = A.slice(snake.end);
+  const B1 = B.slice(end_y);
+
+  console.log({ A0, B0, A1, B1, snake });
+
+  chunks.push(...myersDiffInternal(A0, B0, Vf, Vb));
+  if (snake.begin != snake.end) {
+    chunks.push(createDiffChunk(DiffChunkOp.Equal, A.slice(snake.begin + 1, snake.end)));
+  }
+  chunks.push(...myersDiffInternal(A1, B1, Vf, Vb));
+
+  console.log({ chunks })
+  return chunks;
+}
+
+/**
+ * @brief An implementation of 
+ * [Myers' diff algorithm](http://www.xmailserver.org/diff2.pdf).
+ * 
+ * @param A - Original string
+ * @param B - New string
+ */
+export function myersDiff(A: string, B: string): DiffChunk[] {
+
+  const N = A.length;
+  const M = B.length;
+  const D_MAX = Math.ceil((N + M) / 2);
+  const ARR_LENGTH = D_MAX * 2 + 1;
+
+  let Vf: undefined[] = Array.from({ length: ARR_LENGTH });
+  let Vb = [...Vf];
+
+  return myersDiffInternal(A, B, Vf, Vb);
+
 }
 
 export function greedyDiffSimple(A: string, B: string): number {
