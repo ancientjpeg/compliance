@@ -197,5 +197,6 @@ export function myersDiffClean(A: string, B: string): DiffChunk[] {
   return final;
 }
 
+const myersDiff = myersDiffClean
 
-export default myersDiffClean;
+export default myersDiff;

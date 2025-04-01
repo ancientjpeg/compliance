@@ -1,4 +1,5 @@
 import { huntSzymanskiWithTable } from "./huntSzymanski";
+import myersDiff from "./myers";
 
 export function greedyDiffSimple(A: string, B: string): number {
   const M = A.length;
@@ -51,7 +52,7 @@ export type DiffEntry = {
   begin: number; /* idx in the GCS where the diff occurs */
 }
 
-function diff(A: string, B: string): DiffEntry[] {
+function huntSzymanskiDiff(A: string, B: string): DiffEntry[] {
   let lcs = huntSzymanskiWithTable(A, B);
   const table = lcs.table;
   let m = A.length, n = B.length;
@@ -124,4 +125,5 @@ function diff(A: string, B: string): DiffEntry[] {
   return entries.reverse();
 }
 
+const diff = myersDiff;
 export default diff;
