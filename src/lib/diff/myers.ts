@@ -1,4 +1,5 @@
-import { type DiffChunk, DiffChunkOp, createDiffChunk } from './diffTypes'
+import { DiffChunkOp, createDiffChunk } from './diffTypes'
+import type { DiffChunk, ArrayLike } from './diffTypes'
 
 
 type Snake = {
@@ -9,12 +10,13 @@ type Snake = {
 }
 const createSnake = (begin: number, end: number, k: number, D: number): Snake => ({ begin, end, k, D })
 
+
 /** 
  * We are hoping and praying that the JS engine is smart enough to turn these string slices into references.
  * If that doesn't happen, it honestly might be worth just writing this in Rust/C++ because memory efficiency
  * is kind of a lost cause in JS.
  */
-function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): Snake {
+function myersGetMiddleSnake<T>(A: ArrayLike<T>, B: ArrayLike<T>, Vf: (number | undefined)[], Vb: (number | undefined)[]): Snake {
 
   const N = A.length;
   const M = B.length;
@@ -106,9 +108,9 @@ function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefined)[], V
 
 }
 
-function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): DiffChunk[] {
+function myersDiffInternal<T>(A: ArrayLike<T>, B: ArrayLike<T>, Vf: (number | undefined)[], Vb: (number | undefined)[]): DiffChunk<T>[] {
 
-  let chunks: DiffChunk[] = []
+  let chunks: DiffChunk<T>[] = []
 
   if (A.length == 0 && B.length == 0) {
     return chunks;
@@ -131,7 +133,7 @@ function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb:
     const target_str = Aless ? B : A;
 
     const before = createDiffChunk(DiffChunkOp.Equal, target_str.slice(0, target_idx));
-    const target = createDiffChunk(op, target_str.at(target_idx)!);
+    const target = createDiffChunk(op, target_str.slice(target_idx, target_idx + 1)!);
     const after = createDiffChunk(DiffChunkOp.Equal, target_str.slice(target_idx + 1));
 
     return [before, target, after].filter(el => el.data.length > 0);
@@ -161,7 +163,7 @@ function myersDiffInternal(A: string, B: string, Vf: (number | undefined)[], Vb:
  * @param A - Original string
  * @param B - New string
  */
-export function myersDiffRaw(A: string, B: string): DiffChunk[] {
+export function myersDiffRaw<T>(A: ArrayLike<T>, B: ArrayLike<T>): DiffChunk<T>[] {
 
   const N = A.length;
   const M = B.length;

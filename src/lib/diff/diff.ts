@@ -3,31 +3,33 @@ import { DiffChunkOp, createDiffChunk } from "./diffTypes";
 import type { DiffChunk } from "./diffTypes";
 import { myersDiffRaw } from "./myers";
 
-export function diffCleanup(chunks: DiffChunk[]): DiffChunk[] {
-  const cleanChunks: DiffChunk[] = []
+const diff = myersDiffRaw;
 
-  const getDel = () => createDiffChunk(DiffChunkOp.Delete, '');
-  const getIns = () => createDiffChunk(DiffChunkOp.Insert, '');
+export function wordDiff(A: string, B: string): DiffChunk<string>[] {
 
-  const runningDelete: DiffChunk | null = null;
-  const runningInsert: DiffChunk | null = null;
+  const tokenize = (s: string): Array<string> => {
 
-  for (const chunk of chunks) {
-    if (!runningDelete && !runningInsert && chunk.op == DiffChunkOp.Equal) {
-      cleanChunks.push(chunk);
-      continue;
+    const tokens: Array<string> = [];
+    let matchStart = 0;
+    let regex = new RegExp('\\S+|\\s+', 'g');
+
+    while (regex.test(s)) {
+      tokens.push(s.slice(matchStart, regex.lastIndex));
+      matchStart = regex.lastIndex;
     }
+
+    if (matchStart != s.length) {
+      throw new Error(`Tokenizer stopped at unexpected point, rL=${matchStart} s=${s.length}`);
+    }
+
+    return tokens;
   }
-  return cleanChunks;
-}
 
+  const chunks = myersDiffRaw(tokenize(A), tokenize(B));
 
-function cleanDiff(A: string, B: string) {
-
-  return diffCleanup(myersDiffRaw(A, B));
+  return chunks.map(c => ({ op: c.op, data: (c.data as Array<string>).join('') }));
 
 }
 
-const diff = cleanDiff;
 
 export default diff;
