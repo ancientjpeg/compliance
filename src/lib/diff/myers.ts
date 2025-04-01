@@ -1,6 +1,5 @@
-import { type DiffChunk, DiffChunkOp } from './diffTypes'
+import { type DiffChunk, DiffChunkOp, createDiffChunk } from './diffTypes'
 
-const createDiffChunk = (op: DiffChunkOp, data: string): DiffChunk => ({ op, data });
 
 type Snake = {
   begin: number;
@@ -15,7 +14,7 @@ const createSnake = (begin: number, end: number, k: number, D: number): Snake =>
  * If that doesn't happen, it honestly might be worth just writing this in Rust/C++ because memory efficiency
  * is kind of a lost cause in JS.
  */
-export function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): Snake {
+function myersGetMiddleSnake(A: string, B: string, Vf: (number | undefined)[], Vb: (number | undefined)[]): Snake {
 
   const N = A.length;
   const M = B.length;
@@ -176,27 +175,3 @@ export function myersDiffRaw(A: string, B: string): DiffChunk[] {
 
 }
 
-export function myersDiffClean(A: string, B: string): DiffChunk[] {
-
-  const res = myersDiffRaw(A, B);
-
-  let final: DiffChunk[] = []
-
-  let accumulatingChunk: DiffChunk = res[0];
-  for (let i = 1; i <= res.length; ++i) {
-    const chunk = res.at(i);
-    if (chunk === undefined || accumulatingChunk.op != chunk.op) {
-      final.push(accumulatingChunk);
-      accumulatingChunk = chunk ?? accumulatingChunk;
-    } else {
-      accumulatingChunk.data += chunk.data;
-    }
-  }
-
-
-  return final;
-}
-
-const myersDiff = myersDiffClean
-
-export default myersDiff;

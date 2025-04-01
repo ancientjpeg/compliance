@@ -9,3 +9,4 @@ export type DiffChunk = {
   data: string;
 };
 
+export const createDiffChunk = (op: DiffChunkOp, data: string): DiffChunk => ({ op, data });

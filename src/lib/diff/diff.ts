@@ -1,46 +1,33 @@
-import myersDiff from "./myers";
+import { create } from "domain";
+import { DiffChunkOp, createDiffChunk } from "./diffTypes";
+import type { DiffChunk } from "./diffTypes";
+import { myersDiffRaw } from "./myers";
 
-export function greedyDiffSimple(A: string, B: string): number {
-  const M = A.length;
-  const N = B.length;
-  const MAX = M + N;
+export function diffCleanup(chunks: DiffChunk[]): DiffChunk[] {
+  const cleanChunks: DiffChunk[] = []
 
-  let V = Array.from({ length: MAX * 2 + 1 }, (_, i) => i - MAX);
+  const getDel = () => createDiffChunk(DiffChunkOp.Delete, '');
+  const getIns = () => createDiffChunk(DiffChunkOp.Insert, '');
 
-  V[MAX + 1] = 0;
+  const runningDelete: DiffChunk | null = null;
+  const runningInsert: DiffChunk | null = null;
 
-  for (let D = 0; D <= MAX; ++D) {
-    for (let k = -D; k <= D; k += 2) {
-
-      const k_ind = k + MAX;
-      let x, y;
-      if ((k == 0 || k != D) && (V[k_ind - 1] ?? -1) < V[k_ind + 1]) {
-        x = V[k_ind + 1];
-      } else {
-        x = V[k_ind - 1] + 1;
-      }
-      y = x - k; // by definition
-
-      while (x < N && y < M && B.at(x) == A.at(y)) {
-        ++x;
-        ++y;
-      }
-      V[k_ind] = x;
-
-      if (x >= N && y >= M) {
-        if (k != N - M) {
-          throw new Error("Algo ended at unexpected point");
-        }
-        return D
-      }
+  for (const chunk of chunks) {
+    if (!runningDelete && !runningInsert && chunk.op == DiffChunkOp.Equal) {
+      cleanChunks.push(chunk);
+      continue;
     }
   }
-
-  throw new Error("greedy diff algorithm has a logic error")
+  return cleanChunks;
 }
 
 
+function cleanDiff(A: string, B: string) {
 
+  return diffCleanup(myersDiffRaw(A, B));
 
-const diff = myersDiff;
+}
+
+const diff = cleanDiff;
+
 export default diff;
