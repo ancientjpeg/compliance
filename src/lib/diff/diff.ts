@@ -1,9 +1,6 @@
-import { create } from "domain";
 import { DiffChunkOp, createDiffChunk } from "./diffTypes";
 import type { DiffChunk } from "./diffTypes";
 import { myersDiffRaw } from "./myers";
-
-const diff = myersDiffRaw;
 
 export function wordDiff(A: string, B: string): DiffChunk<string>[] {
 
@@ -30,6 +27,3 @@ export function wordDiff(A: string, B: string): DiffChunk<string>[] {
   return chunks.map(c => ({ op: c.op, data: (c.data as Array<string>).join('') }));
 
 }
-
-
-export default diff;

@@ -1,4 +1,4 @@
-import diff from "$lib/diff/diff";
+import {wordDiff} from "$lib/diff/diff";
 import stringReplace from "$lib/stringReplace";
 import { DocFile } from "$lib/parse/docxIO";
 import { userInput } from "./userInput.svelte";
@@ -38,7 +38,7 @@ export async function updateUserInput(text: string | DocFile, filename: string |
 export type UserDataOutput = {
   text: Promise<UserText>;
   filename: string
-  diff: DiffChunk[]
+  diff: DiffChunk<string>[]
 };
 
 export async function transformToOutput(input: UserData, replacer: Replacer): Promise<UserDataOutput | null> {
@@ -56,7 +56,7 @@ export async function transformToOutput(input: UserData, replacer: Replacer): Pr
 
   const filename = getOutputFilename(input.filename);
 
-  const diffEntries = diff(textAsString, finalTextAsString);
+  const diffEntries = wordDiff(textAsString, finalTextAsString);
   console.log(diffEntries);
   return { text: finalTextPromise, filename, diff: diffEntries };
 }

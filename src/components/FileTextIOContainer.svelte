@@ -60,7 +60,11 @@
 						{#if diffEntry.op == DiffChunkOp.Equal}
 							{diffEntry.data}
 						{:else if diffEntry.op == DiffChunkOp.Insert}
-							<span class="text-green-500">
+							<span class="text-green-500 bg-green-100">
+								{diffEntry.data}
+							</span>
+						{:else if diffEntry.op == DiffChunkOp.Delete}
+							<span class="text-red-500 bg-red-100">
 								{diffEntry.data}
 							</span>
 						{/if}

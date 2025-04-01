@@ -10,7 +10,6 @@
 	}: { data: UserDataOutput | null; class?: string; activeClass?: string } = $props();
 
 	let blobPromise: Promise<Blob> = $derived.by(async () => {
-		$inspect(data);
 		if (data === null) {
 			return new Promise<Blob>(() => {});
 		}
