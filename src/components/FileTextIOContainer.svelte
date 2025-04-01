@@ -5,6 +5,7 @@
 	import FileInput from './FileInput.svelte';
 	import FileOutput from './FileOutput.svelte';
 	import { DocFile } from '$lib/parse/docxIO';
+	import { DiffChunkOp } from '$lib/diff/diffTypes';
 
 	let {
 		isInput,
@@ -52,16 +53,24 @@
 			disabled={userInput.doc !== undefined}
 		></textarea>
 	{:else}
-		{#await userOutput then output}
-			<p placeholder={'Text will output here.'} class={textBoxSharedStyle}>
-				{#each output.diff as diffEntry}
-					{#if diffEntry.isAdded}
-						<span class="text-red-500">{diffEntry.text}</span>
-					{:else}
-						{diffEntry.text}
-					{/if}
-				{/each}
-			</p>
-		{/await}
+		<p placeholder={'Text will output here.'} class={textBoxSharedStyle}>
+			{#await userOutput then output}
+				{#if output !== null}
+					{#each output.diff as diffEntry}
+						{#if diffEntry.op == DiffChunkOp.Equal}
+							{diffEntry.data}
+						{:else if diffEntry.op == DiffChunkOp.Insert}
+							<span class="text-green-500 bg-green-100">
+								{diffEntry.data}
+							</span>
+						{:else if diffEntry.op == DiffChunkOp.Delete}
+							<span class="text-red-500 bg-red-100">
+								{diffEntry.data}
+							</span>
+						{/if}
+					{/each}
+				{/if}
+			{/await}
+		</p>
 	{/if}
 </div>

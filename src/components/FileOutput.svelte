@@ -7,9 +7,12 @@
 		data,
 		class: className,
 		activeClass: inactiveClass
-	}: { data: UserDataOutput; class?: string; activeClass?: string } = $props();
+	}: { data: UserDataOutput | null; class?: string; activeClass?: string } = $props();
 
 	let blobPromise: Promise<Blob> = $derived.by(async () => {
+		if (data === null) {
+			return new Promise<Blob>(() => {});
+		}
 		const t = await data.text;
 		if (t instanceof DocFile) {
 			return await t.getDataAsZip();
@@ -37,8 +40,8 @@
 {#await hrefPromise}
 	<div class={inactiveClass}>Waiting For Input...</div>
 {:then href}
-	<a use:linkLoad={href} {href} download={data.filename} class={className}>
-		Download {data.filename}
+	<a use:linkLoad={href} {href} download={data!.filename} class={className}>
+		Download {data!.filename}
 	</a>
 {:catch err}
 	<div class={inactiveClass}>Got error preparing download: {err}</div>
