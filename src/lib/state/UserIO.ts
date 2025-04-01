@@ -1,10 +1,11 @@
-import { userInput, type UserData, type UserText } from "./userInput.svelte";
-import { DocFile } from "$lib/parse/docxIO";
+import diff from "$lib/diff/diff";
 import stringReplace from "$lib/stringReplace";
+import { DocFile } from "$lib/parse/docxIO";
+import { userInput } from "./userInput.svelte";
+
+import type { DiffChunk } from "$lib/diff/diffTypes";
 import type { Replacer } from "$lib/replacer";
-import diff, { type DiffEntry } from "$lib/diff/diff";
-
-
+import type { UserData, UserText } from "./userInput.svelte";
 
 
 function getOutputFilename(filename: string | undefined) {
@@ -18,14 +19,9 @@ function getOutputFilename(filename: string | undefined) {
   }
 }
 
-type DiffString = {
-  text: string
-  isAdded: boolean
-}
-
 export async function updateUserInput(text: string | DocFile, filename: string | undefined = undefined) {
   console.log(`UPDATE ${filename}`);
-  const isDoc = text instanceof DocFile; 
+  const isDoc = text instanceof DocFile;
 
   if (isDoc) {
     userInput.doc = text;
@@ -38,52 +34,30 @@ export async function updateUserInput(text: string | DocFile, filename: string |
   userInput.filename = filename;
 }
 
-function createDiffStrings(postString: string, diffEntries: DiffEntry[]): DiffString[] {
-  let diffStrings: DiffString[] = []
-  let nextToAdd: number = 0;
-
-  let addNonDiffText = (text: string) => {
-    if (text) {
-      diffStrings.push({text, isAdded: false});
-    }
-  };
-
-  for (const d of diffEntries) {
-    if (!d.added) {
-      continue;
-    }
-
-    addNonDiffText(postString.slice(nextToAdd, d.added.pos));
-    diffStrings.push({text: d.added.text, isAdded: true});
-
-    nextToAdd = d.added.pos + d.added.text.length;
-  }
-
-  addNonDiffText(postString.slice(nextToAdd));
-
-  return diffStrings;
-}
-
-
 /** TODO refactor */
 export type UserDataOutput = {
   text: Promise<UserText>;
   filename: string
-  diff: DiffString[]
+  diff: DiffChunk[]
 };
 
-export async function transformToOutput(input: UserData, replacer: Replacer): Promise<UserDataOutput> {
+export async function transformToOutput(input: UserData, replacer: Replacer): Promise<UserDataOutput | null> {
   const getTextAsString = async (t: UserText): Promise<string> => t instanceof DocFile ? await t.getText() : t;
-  
+
   const finalTextPromise = stringReplace(input.text, replacer);
 
   const textAsString = await getTextAsString(input.text)
+
+  if (textAsString.length == 0) {
+    return null;
+  }
+
   const finalTextAsString = await getTextAsString(await finalTextPromise)
 
   const filename = getOutputFilename(input.filename);
 
   const diffEntries = diff(textAsString, finalTextAsString);
   console.log(diffEntries);
-  return { text: finalTextPromise, filename, diff: createDiffStrings(finalTextAsString, diffEntries) };
+  return { text: finalTextPromise, filename, diff: diffEntries };
 }
 
