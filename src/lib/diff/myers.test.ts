@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { myersDiffRaw } from "./myers";
-import { DiffChunkOp } from './diff.d';
+import { DiffChunkOp } from './diffTypes';
 
 test("Myer's diff correctness checks.", async () => {
   const sames = myersDiffRaw("The cat in the hat.", "The dog in the log.").filter(c => c.op == DiffChunkOp.Equal);

@@ -1,4 +1,4 @@
-import { type DiffChunk, DiffChunkOp } from './diff.d'
+import { type DiffChunk, DiffChunkOp } from './diffTypes'
 
 const createDiffChunk = (op: DiffChunkOp, data: string): DiffChunk => ({ op, data });
 

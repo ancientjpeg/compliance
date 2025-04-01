@@ -1,4 +1,3 @@
-import { huntSzymanskiWithTable } from "./huntSzymanski";
 import myersDiff from "./myers";
 
 export function greedyDiffSimple(A: string, B: string): number {

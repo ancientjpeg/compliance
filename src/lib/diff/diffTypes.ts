@@ -9,9 +9,3 @@ export type DiffChunk = {
   data: string;
 };
 
-export type HSDynamicTable = number[][];
-export type HSResult = {
-  lcsLength: number;
-  table: HSDynamicTable;
-};
-

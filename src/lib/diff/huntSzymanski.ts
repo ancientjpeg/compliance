@@ -1,4 +1,8 @@
-import type { HSResult, HSDynamicTable } from "./diff.d";
+export type HSDynamicTable = number[][];
+export type HSResult = {
+  lcsLength: number;
+  table: HSDynamicTable;
+};
 
 function huntSzymanski(A: string, B: string): number {
   const rowSize = B.length + 1;
