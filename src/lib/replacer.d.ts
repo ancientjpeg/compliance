@@ -1,1 +1,1 @@
-export type Replacer = Map<string, string>
+export type Replacer = Map<string, string>;
