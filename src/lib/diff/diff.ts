@@ -13,10 +13,6 @@ export function wordDiff(A: string, B: string): DiffChunk<string>[] {
 			matchStart = regex.lastIndex;
 		}
 
-		while (regex.test(s)) {
-			console.log('WHAT');
-		}
-
 		if (matchStart != s.length) {
 			throw new Error(`Tokenizer stopped at unexpected point, rL=${matchStart} s=${s.length}`);
 		}
