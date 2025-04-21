@@ -5,6 +5,11 @@ import { DocFile, forEachTextBlockInXMLString } from './docxIO';
 import stringReplace from '$lib/stringReplace';
 import defaultReplacer from '$lib/defaultReplacer';
 
+const testFiles = [
+	path.resolve('./src/lib/testData/docxParserTestData.docx'),
+	path.resolve('./src/lib/testData/docxParserTestDataSmall.docx')
+];
+
 const getDocStrings = async (path: string): Promise<Array<string>> => {
 	const buf: Buffer = await fs.readFile(path);
 	const strings = new Array<string>();
@@ -44,28 +49,32 @@ const performOpOnDocument = async (
 	return docFileReplaced.getDataAsZip();
 };
 
-const docPath = path.resolve('./src/lib/testData/docxParserTestData.docx');
-const docPathOut = path.join(path.dirname(docPath), 'docxParserOutData.docx');
-const docPathComp = path.join(path.dirname(docPath), 'docxParserCompData.docx');
+describe.each(testFiles)('Docx', (filePath) => {
+	let docPath: string, docPathComp: string, docPathOut: string;
 
-beforeEach(async () => {
-	expect(docPath).not.toEqual(docPathOut);
-	expect(docPath).not.toEqual(docPathComp);
+	beforeEach(async () => {
+		docPath = filePath;
 
-	const rmOutFile = async () => {
-		if (await fileExists(docPathOut)) {
-			await fs.rm(docPathOut);
-		}
-	};
+		const suffix = '.docx';
+		const pathBase = path.dirname(docPath) + '/' + path.basename(docPath, suffix);
+		docPathComp = pathBase + 'Comp' + suffix;
+		docPathOut = pathBase + 'Out' + suffix;
+		expect(docPath).not.toEqual(docPathOut);
+		expect(docPath).not.toEqual(docPathComp);
 
-	await rmOutFile();
+		const rmOutFile = async () => {
+			if (await fileExists(docPathOut)) {
+				await fs.rm(docPathOut);
+			}
+		};
 
-	// return async () => {
-	// 	await rmOutFile();
-	// };
-});
+		await rmOutFile();
 
-describe('Docx', () => {
+		// return async () => {
+		// 	await rmOutFile();
+		// };
+	});
+
 	test('XML Parser', async () => {
 		const testXmlString = `\
 <?xml version="1.0" encoding="UTF-8"?>

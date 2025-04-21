@@ -1,15 +1,5 @@
 import JSZip from 'jszip';
 
-function isProperObject(object: any) {
-	if (object === null) {
-		return false;
-	} else if (Array.isArray(object)) {
-		return false;
-	}
-
-	return typeof object === 'object';
-}
-
 export function forEachTextBlockInXMLString(xml: string, fn: (s: string) => string): string {
 	const re = new RegExp('(<w:t[^>]*>)(.*?)(</w:t>)', 'gms');
 	let blocks: [number, number][] = [];
@@ -105,7 +95,7 @@ export class DocFile {
 		const xmlDataString = this.documentXmlString;
 		const zipFile = await JSZip.loadAsync(await this.#data.arrayBuffer());
 		zipFile.file(DocFile.#docPath, xmlDataString);
-		return zipFile.generateAsync({ type: 'blob' });
+		return zipFile.generateAsync({ type: 'blob', compression: 'DEFLATE' });
 	}
 
 	#checkLoaded() {
