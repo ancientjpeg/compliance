@@ -49,6 +49,37 @@ const performOpOnDocument = async (
 	return docFileReplaced.getDataAsZip();
 };
 
+test('XML Parser', async () => {
+	const testXmlString = `\
+<?xml version="1.0" encoding="UTF-8"?>
+<w:document>
+<w:t xml:space="preserve"> Text to replace </w:t>
+<w:t> Text to 
+replace </w:t>
+<w:t> Text to keep </w:t>
+</w:document>\r\n`;
+
+	const expectedXmlString = `\
+<?xml version="1.0" encoding="UTF-8"?>
+<w:document>
+<w:t xml:space="preserve"> Replaced text </w:t>
+<w:t> Replaced 
+text </w:t>
+<w:t> Text to keep </w:t>
+</w:document>\r\n`;
+
+	const expectedStrings = [' Text to replace ', ' Text to \nreplace ', ' Text to keep '];
+	let detectedStrings: string[] = [];
+	const op = (s: string) => {
+		detectedStrings.push(s);
+		return s.replace(/Text to(.*?)replace/gms, 'Replaced$1text');
+	};
+	const newXml = forEachTextBlockInXMLString(testXmlString, op);
+
+	expect(detectedStrings).toStrictEqual(expectedStrings);
+	expect(newXml).toStrictEqual(expectedXmlString);
+});
+
 describe.each(testFiles)('Docx', (filePath) => {
 	let docPath: string, docPathComp: string, docPathOut: string;
 
@@ -75,36 +106,6 @@ describe.each(testFiles)('Docx', (filePath) => {
 		// };
 	});
 
-	test('XML Parser', async () => {
-		const testXmlString = `\
-<?xml version="1.0" encoding="UTF-8"?>
-<w:document>
-<w:t xml:space="preserve"> Text to replace </w:t>
-<w:t> Text to 
-replace </w:t>
-<w:t> Text to keep </w:t>
-</w:document>\r\n`;
-
-		const expectedXmlString = `\
-<?xml version="1.0" encoding="UTF-8"?>
-<w:document>
-<w:t xml:space="preserve"> Replaced text </w:t>
-<w:t> Replaced 
-text </w:t>
-<w:t> Text to keep </w:t>
-</w:document>\r\n`;
-
-		const expectedStrings = [' Text to replace ', ' Text to \nreplace ', ' Text to keep '];
-		let detectedStrings: string[] = [];
-		const op = (s: string) => {
-			detectedStrings.push(s);
-			return s.replace(/Text to(.*?)replace/gms, 'Replaced$1text');
-		};
-		const newXml = forEachTextBlockInXMLString(testXmlString, op);
-
-		expect(detectedStrings).toStrictEqual(expectedStrings);
-		expect(newXml).toStrictEqual(expectedXmlString);
-	});
 	test('exporter does not corrupt text', async () => {
 		let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
 		let doc1 = await doc0.forEachTextBlock((s: string) => s.slice(0));
