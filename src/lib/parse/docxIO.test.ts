@@ -80,21 +80,21 @@ replace </w:t>
 		const expectedXmlString = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <w:document>
-<w:t> Text to keep </w:t>
-<w:t> Text to 
-keep </w:t>
+<w:t> Replaced text </w:t>
+<w:t> Replaced 
+text </w:t>
 <w:t> Text to keep </w:t>
 </w:document>\r\n`;
 
 		const expectedStrings = [' Text to replace ', ' Text to \nreplace ', ' Text to keep '];
-		let testStrings: string[] = [];
+		let detectedStrings: string[] = [];
 		const op = (s: string) => {
-			testStrings.push(s);
-			return s.replace('replace', 'keep');
+			detectedStrings.push(s);
+			return s.replace(/Text to(.*?)replace/gms, 'Replaced$1text');
 		};
 		const newXml = forEachTextBlockInXMLString(testXmlString, op);
-		expect(testStrings).toStrictEqual(expectedStrings);
 
+		expect(detectedStrings).toStrictEqual(expectedStrings);
 		expect(newXml).toStrictEqual(expectedXmlString);
 	});
 	test('exporter does not corrupt text', async () => {
