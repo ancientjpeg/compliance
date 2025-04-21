@@ -11,15 +11,21 @@ function isProperObject(object: any) {
 	return typeof object === 'object';
 }
 
-function forEachStringWithMatchingKey(object: any, key: string, fn: (s: string) => string): any {
+function forEachStringWithMatchingKey(object: any, keys: string[], fn: (s: string) => string): any {
 	for (const k in object) {
 		const v: any = object[k];
 		if (Array.isArray(v)) {
-			object[k] = v.map((av) => forEachStringWithMatchingKey(av, key, fn));
+			object[k] = v.map((av) => forEachStringWithMatchingKey(av, keys, fn));
 		} else if (isProperObject(v)) {
-			object[k] = forEachStringWithMatchingKey(v, key, fn);
-		} else if (key == k && typeof v === 'string') {
+			object[k] = forEachStringWithMatchingKey(v, keys, fn);
+		} else if (keys.includes(k) && typeof v === 'string') {
 			object[k] = fn(v);
+		} else {
+			if (typeof v !== 'string' || k.substring(0, 2) != '@_') {
+				throw new Error(
+					`Encountered unexpected XML value when parsing docx document: { "${k}", "${v}" }`
+				);
+			}
 		}
 	}
 	return object;
@@ -36,7 +42,8 @@ export class DocFile {
 	static #docPath: string = 'word/document.xml';
 	static #xmlOptions: any = {
 		ignoreAttributes: false,
-		attributeNamePrefix: '@_'
+		attributeNamePrefix: '@_',
+		trimValues: false
 	};
 
 	private constructor(data: Blob, xmlJObj: any) {
@@ -66,7 +73,7 @@ export class DocFile {
 		const newData = this.#data.slice();
 		const newXml = JSON.parse(JSON.stringify(this.#xmlJObj));
 		const d = new DocFile(newData, newXml);
-		d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, 'w:t', fn);
+		d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, ['w:t', '#text'], fn);
 		return d;
 	}
 

@@ -1,4 +1,4 @@
-import { test, expect } from 'vitest';
+import { test, expect, describe, beforeEach } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
 import { DocFile } from './docxIO';
@@ -29,11 +29,12 @@ const fileExists = async (path: string) => {
 	return true;
 };
 
-/** @todo refactor this tests to test more than just stringReplace */
-test('Docx export operates as expected with stringReplace', async () => {
-	const docPath = path.resolve('./src/lib/testData/docxParserTestData.docx');
-	const docPathOut = path.join(path.dirname(docPath), 'docxParserOutData.docx');
-	const docPathComp = path.join(path.dirname(docPath), 'docxParserCompData.docx');
+const docPath = path.resolve('./src/lib/testData/docxParserTestData.docx');
+const docPathOut = path.join(path.dirname(docPath), 'docxParserOutData.docx');
+const docPathComp = path.join(path.dirname(docPath), 'docxParserCompData.docx');
+
+beforeEach(async () => {
+	console.log('BEFORE!');
 
 	expect(docPath).not.toEqual(docPathOut);
 	expect(docPath).not.toEqual(docPathComp);
@@ -41,22 +42,28 @@ test('Docx export operates as expected with stringReplace', async () => {
 	if (await fileExists(docPathOut)) {
 		await fs.rm(docPathOut);
 	}
+});
 
-	const fbuf: Buffer = await fs.readFile(docPath);
-	const docFile = await DocFile.createDocFile(new Blob([fbuf]));
+/** @todo refactor this tests to test more than just stringReplace */
+describe('Docx', () => {
+	test('exporter does not corrupt text', () => {});
+	test('export operates as expected with stringReplace', async () => {
+		const fbuf: Buffer = await fs.readFile(docPath);
+		const docFile = await DocFile.createDocFile(new Blob([fbuf]));
 
-	const docFileReplaced = (await stringReplace(docFile, defaultReplacer)) as DocFile;
+		const docFileReplaced = (await stringReplace(docFile, defaultReplacer)) as DocFile;
 
-	const outData = await docFileReplaced.getDataAsZip();
+		const outData = await docFileReplaced.getDataAsZip();
 
-	let compDataExists = await fileExists(docPathComp);
+		let compDataExists = await fileExists(docPathComp);
 
-	/* jesus christ... now i see why they made deno */
-	const data = Buffer.from(await outData.arrayBuffer());
-	await fs.writeFile(docPathOut, data);
-	if (!compDataExists) {
-		await fs.writeFile(docPathComp, data);
-	}
+		/* jesus christ... now i see why they made deno */
+		const data = Buffer.from(await outData.arrayBuffer());
+		await fs.writeFile(docPathOut, data);
+		if (!compDataExists) {
+			await fs.writeFile(docPathComp, data);
+		}
 
-	expect(await getDocStrings(docPathOut)).toStrictEqual(await getDocStrings(docPathComp));
+		expect(await getDocStrings(docPathOut)).toStrictEqual(await getDocStrings(docPathComp));
+	});
 });
