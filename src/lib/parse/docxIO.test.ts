@@ -4,7 +4,6 @@ import path from 'path';
 import { DocFile, forEachTextBlockInXMLString } from './docxIO';
 import stringReplace from '$lib/stringReplace';
 import defaultReplacer from '$lib/defaultReplacer';
-import * as xml from 'fast-xml-parser';
 
 const getDocStrings = async (path: string): Promise<Array<string>> => {
 	const buf: Buffer = await fs.readFile(path);
@@ -101,8 +100,8 @@ text </w:t>
 		let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
 		let doc1 = await doc0.forEachTextBlock((s: string) => s.slice(0));
 
-		let s0: string = doc0.getDocumentXMLString();
-		let s1: string = doc1.getDocumentXMLString();
+		let s0: string = doc0.documentXmlString;
+		let s1: string = doc1.documentXmlString;
 		expect(s0).toEqual(s1);
 
 		const outData = await doc1.getDataAsZip();
