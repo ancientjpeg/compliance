@@ -22,9 +22,11 @@ function forEachStringWithMatchingKey(object: any, keys: string[], fn: (s: strin
 			object[k] = fn(v);
 		} else {
 			if (typeof v !== 'string' || k.substring(0, 2) != '@_') {
-				throw new Error(
-					`Encountered unexpected XML value when parsing docx document: { "${k}", "${v}" }`
-				);
+				if (typeof v !== 'number') {
+					throw new Error(
+						`Encountered unexpected XML value when parsing docx document: { "${k}", "${v}" }, typeof v: ${typeof v}`
+					);
+				}
 			}
 		}
 	}
