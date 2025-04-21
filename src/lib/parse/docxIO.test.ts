@@ -71,7 +71,7 @@ describe('Docx', () => {
 		const testXmlString = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <w:document>
-<w:t> Text to replace </w:t>
+<w:t xml:space="preserve"> Text to replace </w:t>
 <w:t> Text to 
 replace </w:t>
 <w:t> Text to keep </w:t>
@@ -80,7 +80,7 @@ replace </w:t>
 		const expectedXmlString = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <w:document>
-<w:t> Replaced text </w:t>
+<w:t xml:space="preserve"> Replaced text </w:t>
 <w:t> Replaced 
 text </w:t>
 <w:t> Text to keep </w:t>
