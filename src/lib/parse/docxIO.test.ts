@@ -68,23 +68,23 @@ beforeEach(async () => {
 
 describe('Docx', () => {
 	test('XML Parser', async () => {
-		const testXmlString = `<?xml version="1.0" encoding="UTF-8"?>
+		const testXmlString = `\
+<?xml version="1.0" encoding="UTF-8"?>
 <w:document>
 <w:t> Text to replace </w:t>
 <w:t> Text to 
 replace </w:t>
 <w:t> Text to keep </w:t>
-</w:document>
-`;
+</w:document>\r\n`;
 
-		const expectedXmlString = `<?xml version="1.0" encoding="UTF-8"?>
+		const expectedXmlString = `\
+<?xml version="1.0" encoding="UTF-8"?>
 <w:document>
 <w:t> Text to keep </w:t>
 <w:t> Text to 
 keep </w:t>
 <w:t> Text to keep </w:t>
-</w:document>
-`;
+</w:document>\r\n`;
 
 		const expectedStrings = [' Text to replace ', ' Text to \nreplace ', ' Text to keep '];
 		let testStrings: string[] = [];
