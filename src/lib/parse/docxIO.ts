@@ -43,7 +43,9 @@ export class DocFile {
 	static #xmlOptions: any = {
 		ignoreAttributes: false,
 		attributeNamePrefix: '@_',
-		trimValues: false
+		trimValues: false,
+		preserveOrder: true,
+		suppressEmptyNode: true
 	};
 
 	private constructor(data: Blob, xmlJObj: any) {
@@ -52,24 +54,28 @@ export class DocFile {
 		this.#checkLoaded();
 	}
 
-	/* Create a DocFile. Takes ownership of fileData. */
-	static async createDocFile(fileData: Blob): Promise<DocFile> {
+	/* Gets document XML as a string from a docx zip blob. separated from `createDocFile` for testing. */
+	static async docXMLDataFromZipBlob(fileData: Blob): Promise<string> {
 		const zipFile = await JSZip.loadAsync(await fileData.arrayBuffer());
 		const doc = zipFile.file(DocFile.#docPath);
 		if (doc === null) {
 			throw Error('Unable to find expected document.xml in unzipped word doc');
 		}
 
-		const docTextPromise = doc.async('text');
+		return doc.async('text');
+	}
+
+	/* Create a DocFile. Takes ownership of fileData. */
+	static async createDocFile(fileData: Blob): Promise<DocFile> {
+		const docTextPromise = this.docXMLDataFromZipBlob(fileData);
 		const parser = new xml.XMLParser(DocFile.#xmlOptions);
 		const xmlObject: any = parser.parse(await docTextPromise);
 		return new DocFile(fileData, xmlObject);
 	}
 
-	/** May throw iff `!this.loaded`. Returns a copy of `this` */
+	/** May throw iff `!this.loaded`. Returns a deep copy of `this` */
 	async forEachTextBlock(fn: (s: string) => string): Promise<DocFile> {
 		this.#checkLoaded();
-		/** TS compiler can't tell but this is guaranteed to exist now */
 		const newData = this.#data.slice();
 		const newXml = JSON.parse(JSON.stringify(this.#xmlJObj));
 		const d = new DocFile(newData, newXml);
@@ -87,11 +93,21 @@ export class DocFile {
 		return ret;
 	}
 
-	async getDataAsZip(): Promise<Blob> {
+	/* Converts the stored XML data to a string. */
+	getDocumentXMLString(): string {
 		this.#checkLoaded();
 		const builder = new xml.XMLBuilder(DocFile.#xmlOptions);
-		const xmlDataString = builder.build(this.#xmlJObj);
+		let xmlString: string = builder.build(this.#xmlJObj);
 
+		/* Mostly for tests passing, but we want to make sure the docx replacer has no effect for unaffected docs. */
+		const insertIndex = xmlString.indexOf('>') + 1;
+		xmlString = xmlString.slice(0, insertIndex) + '\n' + xmlString.slice(insertIndex) + '\n';
+
+		return xmlString;
+	}
+
+	async getDataAsZip(): Promise<Blob> {
+		const xmlDataString = this.getDocumentXMLString();
 		const zipFile = await JSZip.loadAsync(await this.#data.arrayBuffer());
 		zipFile.file(DocFile.#docPath, xmlDataString);
 		return zipFile.generateAsync({ type: 'blob' });
