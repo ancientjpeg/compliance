@@ -40,9 +40,10 @@
 {#await hrefPromise}
 	<div class={inactiveClass}>Waiting For Input...</div>
 {:then href}
-	<a use:linkLoad={href} {href} download={data!.filename} class={className}>
+	<!-- <a use:linkLoad={href} {href} download={data!.filename} class={className}>
 		Download {data!.filename}
-	</a>
+	</a> -->
+	<div class={inactiveClass}>Downloads are broken right now, check back next week!</div>
 {:catch err}
 	<div class={inactiveClass}>Got error preparing download: {err}</div>
 {/await}
