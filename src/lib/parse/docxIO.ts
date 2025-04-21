@@ -19,16 +19,23 @@ function forEachStringWithMatchingKey(
 ): any {
 	for (const k in object) {
 		const v: any = object[k];
-		if (Array.isArray(v)) {
-			object[k] = v.map((av) => forEachStringWithMatchingKey(av, keys, fn, (parent = object)));
-		} else if (isProperObject(v)) {
-			object[k] = forEachStringWithMatchingKey(v, keys, fn, (parent = object));
-		} else if (keys.includes(k)) {
+		if (keys.includes(k)) {
 			if (typeof v === 'string') {
 				object[k] = fn(v);
 			} else {
-				throw new Error(`CHECK THIS OUT: { "${k}", "${v}" }, typeof v: ${typeof v}`);
+				const val = v[0]['#text'];
+				if (typeof val === 'string' || typeof val !== 'number') {
+					try {
+						v[0]['#text'] = fn(v[0]['#text']);
+					} catch {
+						throw new Error(`CHECK THIS OUT: { "${k}", "${v}" }, typeof v: ${typeof v}`);
+					}
+				}
 			}
+		} else if (Array.isArray(v)) {
+			object[k] = v.map((av) => forEachStringWithMatchingKey(av, keys, fn, (parent = object)));
+		} else if (isProperObject(v)) {
+			object[k] = forEachStringWithMatchingKey(v, keys, fn, (parent = object));
 		} else {
 			if (typeof v !== 'string' || (k.substring(0, 2) != '@_' && k != '#text')) {
 				if (typeof v !== 'number') {
@@ -94,7 +101,7 @@ export class DocFile {
 		const newData = this.#data.slice();
 		const newXml = JSON.parse(JSON.stringify(this.#xmlJObj));
 		const d = new DocFile(newData, newXml);
-		d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, ['w:t'], fn);
+		d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, ['w:t', 'w:text'], fn);
 		return d;
 	}
 
