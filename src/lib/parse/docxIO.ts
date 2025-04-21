@@ -11,6 +11,36 @@ function isProperObject(object: any) {
 	return typeof object === 'object';
 }
 
+export function forEachTextBlockInXMLString(xml: string, fn: (s: string) => string): string {
+	const re = new RegExp('(<w:t[^>]*>)(.*?)(</w:t>)', 'gms');
+	let blocks: [number, number][] = [];
+	for (const match of xml.matchAll(re)) {
+		const start = match.index + match[1].length;
+		const end = start + match[2].length;
+		blocks.push([start, end]);
+	}
+
+	if (blocks.length === 0) {
+		throw new Error('Found no .docx text tags in xml string');
+	}
+
+	let stringOut = xml.slice(0, blocks[0][0]);
+
+	for (let i = 0; i < blocks.length; ++i) {
+		const [start, end] = blocks[i];
+		stringOut += fn(xml.slice(start, end));
+
+		let suffixEnd = xml.length;
+		if (i < blocks.length - 1) {
+			suffixEnd = blocks[i + 1][0];
+		}
+
+		stringOut += xml.slice(end, suffixEnd);
+	}
+
+	return stringOut;
+}
+
 function forEachStringWithMatchingKey(
 	object: any,
 	keys: string[],

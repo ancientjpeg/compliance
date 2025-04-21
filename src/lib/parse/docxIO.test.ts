@@ -1,7 +1,7 @@
 import { test, expect, describe, beforeEach } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
-import { DocFile } from './docxIO';
+import { DocFile, forEachTextBlockInXMLString } from './docxIO';
 import stringReplace from '$lib/stringReplace';
 import defaultReplacer from '$lib/defaultReplacer';
 import * as xml from 'fast-xml-parser';
@@ -67,6 +67,36 @@ beforeEach(async () => {
 });
 
 describe('Docx', () => {
+	test('XML Parser', async () => {
+		const testXmlString = `<?xml version="1.0" encoding="UTF-8"?>
+<w:document>
+<w:t> Text to replace </w:t>
+<w:t> Text to 
+replace </w:t>
+<w:t> Text to keep </w:t>
+</w:document>
+`;
+
+		const expectedXmlString = `<?xml version="1.0" encoding="UTF-8"?>
+<w:document>
+<w:t> Text to keep </w:t>
+<w:t> Text to 
+keep </w:t>
+<w:t> Text to keep </w:t>
+</w:document>
+`;
+
+		const expectedStrings = [' Text to replace ', ' Text to \nreplace ', ' Text to keep '];
+		let testStrings: string[] = [];
+		const op = (s: string) => {
+			testStrings.push(s);
+			return s.replace('replace', 'keep');
+		};
+		const newXml = forEachTextBlockInXMLString(testXmlString, op);
+		expect(testStrings).toStrictEqual(expectedStrings);
+
+		expect(newXml).toStrictEqual(expectedXmlString);
+	});
 	test('exporter does not corrupt text', async () => {
 		let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
 		let doc1 = await doc0.forEachTextBlock((s: string) => s.slice(0));
