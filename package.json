@@ -39,7 +39,6 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"fast-xml-parser": "^5.0.9",
 		"jszip": "^3.10.1"
 	},
 	"volta": {
