@@ -61,9 +61,9 @@ beforeEach(async () => {
 
 	await rmOutFile();
 
-	return async () => {
-		await rmOutFile();
-	};
+	// return async () => {
+	// 	await rmOutFile();
+	// };
 });
 
 test('XML test', async () => {
@@ -89,16 +89,21 @@ describe('Docx', () => {
 		let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
 		let doc1 = await doc0.forEachTextBlock((s: string) => s.slice(0));
 
-		let s0 = doc0.getDocumentXMLString();
-		let s1 = doc1.getDocumentXMLString();
+		let s0: string = doc0.getDocumentXMLString();
+		let s1: string = doc1.getDocumentXMLString();
 		expect(s0).toEqual(s1);
 
 		const outData = await doc1.getDataAsZip();
 		await fs.writeFile(docPathOut, Buffer.from(await outData.arrayBuffer()));
 
-		s0 = await DocFile.docXMLDataFromZipBlob(await blobFromFile(docPath));
-		s1 = await DocFile.docXMLDataFromZipBlob(await blobFromFile(docPathOut));
-		expect(s0).toEqual(s1);
+		const bytesFromDocXML = async (path: string) => {
+			return await (await DocFile.docXMLBlobFromZipBlob(await blobFromFile(path))).bytes();
+		};
+
+		const b0 = await bytesFromDocXML(docPath);
+		const b1 = await bytesFromDocXML(docPathOut);
+		// expect(b0.byteLength).toStrictEqual(b1.byteLength);
+		expect(b0).toStrictEqual(b1);
 	});
 
 	test('export operates as expected with stringReplace', async () => {

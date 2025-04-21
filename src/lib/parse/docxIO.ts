@@ -11,17 +11,26 @@ function isProperObject(object: any) {
 	return typeof object === 'object';
 }
 
-function forEachStringWithMatchingKey(object: any, keys: string[], fn: (s: string) => string): any {
+function forEachStringWithMatchingKey(
+	object: any,
+	keys: string[],
+	fn: (s: string) => string,
+	parent: null | object = null
+): any {
 	for (const k in object) {
 		const v: any = object[k];
 		if (Array.isArray(v)) {
-			object[k] = v.map((av) => forEachStringWithMatchingKey(av, keys, fn));
+			object[k] = v.map((av) => forEachStringWithMatchingKey(av, keys, fn, (parent = object)));
 		} else if (isProperObject(v)) {
-			object[k] = forEachStringWithMatchingKey(v, keys, fn);
-		} else if (keys.includes(k) && typeof v === 'string') {
-			object[k] = fn(v);
+			object[k] = forEachStringWithMatchingKey(v, keys, fn, (parent = object));
+		} else if (keys.includes(k)) {
+			if (typeof v === 'string') {
+				object[k] = fn(v);
+			} else {
+				throw new Error(`CHECK THIS OUT: { "${k}", "${v}" }, typeof v: ${typeof v}`);
+			}
 		} else {
-			if (typeof v !== 'string' || k.substring(0, 2) != '@_') {
+			if (typeof v !== 'string' || (k.substring(0, 2) != '@_' && k != '#text')) {
 				if (typeof v !== 'number') {
 					throw new Error(
 						`Encountered unexpected XML value when parsing docx document: { "${k}", "${v}" }, typeof v: ${typeof v}`
@@ -56,15 +65,19 @@ export class DocFile {
 		this.#checkLoaded();
 	}
 
-	/* Gets document XML as a string from a docx zip blob. separated from `createDocFile` for testing. */
-	static async docXMLDataFromZipBlob(fileData: Blob): Promise<string> {
+	static async docXMLBlobFromZipBlob(fileData: Blob): Promise<Blob> {
 		const zipFile = await JSZip.loadAsync(await fileData.arrayBuffer());
 		const doc = zipFile.file(DocFile.#docPath);
 		if (doc === null) {
 			throw Error('Unable to find expected document.xml in unzipped word doc');
 		}
 
-		return doc.async('text');
+		return doc.async('blob');
+	}
+
+	/* Gets document XML as a string from a docx zip blob. separated from `createDocFile` for testing. */
+	static async docXMLDataFromZipBlob(fileData: Blob): Promise<string> {
+		return (await this.docXMLBlobFromZipBlob(fileData)).text();
 	}
 
 	/* Create a DocFile. Takes ownership of fileData. */
@@ -81,7 +94,7 @@ export class DocFile {
 		const newData = this.#data.slice();
 		const newXml = JSON.parse(JSON.stringify(this.#xmlJObj));
 		const d = new DocFile(newData, newXml);
-		d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, ['w:t', '#text'], fn);
+		d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, ['w:t'], fn);
 		return d;
 	}
 
