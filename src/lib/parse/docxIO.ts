@@ -1,75 +1,90 @@
-import * as xml from 'fast-xml-parser';
 import JSZip from 'jszip';
 
-function isProperObject(object: any) {
-	if (object === null) {
-		return false;
-	} else if (Array.isArray(object)) {
-		return false;
+/**
+ * Takes a string representing a .docx-compliant XML file and performs `fn`
+ * on all visible text in the document. Returns a new string with the edits.
+ */
+export function forEachDocxXmlTextBlock(xml: string, fn: (s: string) => string): string {
+	const re = new RegExp('(<w:t[^>]*>)(.*?)(</w:t>)', 'gms');
+	let blocks: [number, number][] = [];
+	for (const match of xml.matchAll(re)) {
+		const start = match.index + match[1].length;
+		const end = start + match[2].length;
+		blocks.push([start, end]);
 	}
 
-	return typeof object === 'object';
-}
+	if (blocks.length === 0) {
+		throw new Error('Found no .docx text tags in xml string');
+	}
 
-function forEachStringWithMatchingKey(object: any, key: string, fn: (s: string) => string): any {
-	for (const k in object) {
-		const v: any = object[k];
-		if (Array.isArray(v)) {
-			object[k] = v.map((av) => forEachStringWithMatchingKey(av, key, fn));
-		} else if (isProperObject(v)) {
-			object[k] = forEachStringWithMatchingKey(v, key, fn);
-		} else if (key == k && typeof v === 'string') {
-			object[k] = fn(v);
+	let stringOut = xml.slice(0, blocks[0][0]);
+
+	for (let i = 0; i < blocks.length; ++i) {
+		const [start, end] = blocks[i];
+		stringOut += fn(xml.slice(start, end));
+
+		let suffixEnd = xml.length;
+		if (i < blocks.length - 1) {
+			suffixEnd = blocks[i + 1][0];
 		}
+
+		stringOut += xml.slice(end, suffixEnd);
 	}
-	return object;
+
+	return stringOut;
 }
 
+/**
+ * A class encapsulating a .docx-file. Designed to be quasi-RAII, in that there
+ * a DocFile is immutable, and any edits will create a new DocFile.
+ */
 export class DocFile {
 	/**
 	 * @note #data is not updated past ctor, it's just used as a reference point
 	 * when reconstructing the docx zip.
 	 */
-
 	#data: Blob;
-	#xmlJObj: any;
+	#xmlString: string;
 	static #docPath: string = 'word/document.xml';
-	static #xmlOptions: any = {
-		ignoreAttributes: false,
-		attributeNamePrefix: '@_'
-	};
 
-	private constructor(data: Blob, xmlJObj: any) {
+	private constructor(data: Blob, xmlString: string) {
 		this.#data = data;
-		this.#xmlJObj = xmlJObj;
+		this.#xmlString = xmlString;
 		this.#checkLoaded();
 	}
 
-	/* Create a DocFile. Takes ownership of fileData. */
-	static async createDocFile(fileData: Blob): Promise<DocFile> {
+	/**
+	 * @returns The text of the word/document.xml file contained within the
+	 * zip-encoded data contained in `fileData`.
+	 */
+	static async documentXMLFromZip(fileData: Blob): Promise<string> {
 		const zipFile = await JSZip.loadAsync(await fileData.arrayBuffer());
 		const doc = zipFile.file(DocFile.#docPath);
 		if (doc === null) {
 			throw Error('Unable to find expected document.xml in unzipped word doc');
 		}
 
-		const docTextPromise = doc.async('text');
-		const parser = new xml.XMLParser(DocFile.#xmlOptions);
-		const xmlObject: any = parser.parse(await docTextPromise);
+		return doc.async('text');
+	}
+
+	/* Create a DocFile. Takes ownership of fileData. */
+	static async createDocFile(fileData: Blob): Promise<DocFile> {
+		const xmlObject = await this.documentXMLFromZip(fileData);
 		return new DocFile(fileData, xmlObject);
 	}
 
-	/** May throw iff `!this.loaded`. Returns a copy of `this` */
+	/**
+	 * May throw iff `!this.loaded`. Returns a deep copy of `this`.
+	 * `this` is not modified (DocFile is immutable).
+	 */
 	async forEachTextBlock(fn: (s: string) => string): Promise<DocFile> {
 		this.#checkLoaded();
-		/** TS compiler can't tell but this is guaranteed to exist now */
 		const newData = this.#data.slice();
-		const newXml = JSON.parse(JSON.stringify(this.#xmlJObj));
-		const d = new DocFile(newData, newXml);
-		d.#xmlJObj = forEachStringWithMatchingKey(d.#xmlJObj, 'w:t', fn);
-		return d;
+		const newXmlString = forEachDocxXmlTextBlock(this.#xmlString, fn);
+		return new DocFile(newData, newXmlString);
 	}
 
+	/* Return all visible text in the .docx file. Text tags are joined by newlines. */
 	async getText() {
 		this.#checkLoaded();
 		let ret: string = '';
@@ -80,18 +95,22 @@ export class DocFile {
 		return ret;
 	}
 
-	async getDataAsZip(): Promise<Blob> {
+	/* Converts the stored XML data to a string. */
+	get documentXmlString(): string {
 		this.#checkLoaded();
-		const builder = new xml.XMLBuilder(DocFile.#xmlOptions);
-		const xmlDataString = builder.build(this.#xmlJObj);
+		return this.#xmlString;
+	}
 
+	/* Returns a blob containing the zip-encoded docx file with any modifications. */
+	async getDataAsZip(): Promise<Blob> {
+		const xmlDataString = this.documentXmlString;
 		const zipFile = await JSZip.loadAsync(await this.#data.arrayBuffer());
 		zipFile.file(DocFile.#docPath, xmlDataString);
-		return zipFile.generateAsync({ type: 'blob' });
+		return zipFile.generateAsync({ type: 'blob', compression: 'DEFLATE' });
 	}
 
 	#checkLoaded() {
-		if (!this.#xmlJObj || Object.keys(this.#xmlJObj).length === 0) {
+		if (this.#xmlString.length === 0) {
 			throw new Error('DocFile is not loaded');
 		}
 	}

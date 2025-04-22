@@ -22,7 +22,6 @@ export async function updateUserInput(
 	text: string | DocFile,
 	filename: string | undefined = undefined
 ) {
-	console.log(`UPDATE ${filename}`);
 	const isDoc = text instanceof DocFile;
 
 	if (isDoc) {
@@ -63,6 +62,5 @@ export async function transformToOutput(
 	const filename = getOutputFilename(input.filename);
 
 	const diffEntries = wordDiff(textAsString, finalTextAsString);
-	console.log(diffEntries);
 	return { text: finalTextPromise, filename, diff: diffEntries };
 }

@@ -1,9 +1,14 @@
-import { test, expect } from 'vitest';
+import { test, expect, describe, beforeEach } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
-import { DocFile } from './docxIO';
+import { DocFile, forEachDocxXmlTextBlock } from './docxIO';
 import stringReplace from '$lib/stringReplace';
 import defaultReplacer from '$lib/defaultReplacer';
+
+const testFiles = [
+	path.resolve('./src/lib/testData/docxParserTestData.docx'),
+	path.resolve('./src/lib/testData/docxParserTestDataSmall.docx')
+];
 
 const getDocStrings = async (path: string): Promise<Array<string>> => {
 	const buf: Buffer = await fs.readFile(path);
@@ -29,34 +34,119 @@ const fileExists = async (path: string) => {
 	return true;
 };
 
-/** @todo refactor this tests to test more than just stringReplace */
-test('Docx export operates as expected with stringReplace', async () => {
-	const docPath = path.resolve('./src/lib/testData/docxParserTestData.docx');
-	const docPathOut = path.join(path.dirname(docPath), 'docxParserOutData.docx');
-	const docPathComp = path.join(path.dirname(docPath), 'docxParserCompData.docx');
+const blobFromFile = async (path: string): Promise<Blob> => {
+	const fbuf: Buffer = await fs.readFile(path);
+	return new Blob([fbuf]);
+};
 
-	expect(docPath).not.toEqual(docPathOut);
-	expect(docPath).not.toEqual(docPathComp);
+const performOpOnDocument = async (
+	path: string,
+	op: (doc: DocFile) => Promise<DocFile>
+): Promise<Blob> => {
+	const docFile = await DocFile.createDocFile(await blobFromFile(path));
 
-	if (await fileExists(docPathOut)) {
-		await fs.rm(docPathOut);
-	}
+	const docFileReplaced = await op(docFile);
+	return docFileReplaced.getDataAsZip();
+};
 
-	const fbuf: Buffer = await fs.readFile(docPath);
-	const docFile = await DocFile.createDocFile(new Blob([fbuf]));
+test('XML Parser', async () => {
+	const testXmlString = `\
+<?xml version="1.0" encoding="UTF-8"?>
+<w:document>
+<w:t xml:space="preserve"> Text to replace </w:t>
+<w:t> Text to 
+replace </w:t>
+<w:t> Text to keep </w:t>
+</w:document>\r\n`;
 
-	const docFileReplaced = (await stringReplace(docFile, defaultReplacer)) as DocFile;
+	const expectedXmlString = `\
+<?xml version="1.0" encoding="UTF-8"?>
+<w:document>
+<w:t xml:space="preserve"> Replaced text </w:t>
+<w:t> Replaced 
+text </w:t>
+<w:t> Text to keep </w:t>
+</w:document>\r\n`;
 
-	const outData = await docFileReplaced.getDataAsZip();
+	const expectedStrings = [' Text to replace ', ' Text to \nreplace ', ' Text to keep '];
+	let detectedStrings: string[] = [];
+	const op = (s: string) => {
+		detectedStrings.push(s);
+		return s.replace(/Text to(.*?)replace/gms, 'Replaced$1text');
+	};
+	const newXml = forEachDocxXmlTextBlock(testXmlString, op);
 
-	let compDataExists = await fileExists(docPathComp);
+	expect(detectedStrings).toStrictEqual(expectedStrings);
+	expect(newXml).toStrictEqual(expectedXmlString);
+});
 
-	/* jesus christ... now i see why they made deno */
-	const data = Buffer.from(await outData.arrayBuffer());
-	await fs.writeFile(docPathOut, data);
-	if (!compDataExists) {
-		await fs.writeFile(docPathComp, data);
-	}
+describe.each(testFiles)('Docx', (filePath) => {
+	let docPath: string, docPathComp: string, docPathOut: string;
 
-	expect(await getDocStrings(docPathOut)).toStrictEqual(await getDocStrings(docPathComp));
+	beforeEach(async () => {
+		docPath = filePath;
+
+		const suffix = '.docx';
+		const pathBase = path.dirname(docPath) + '/' + path.basename(docPath, suffix);
+		docPathComp = pathBase + 'Comp' + suffix;
+		docPathOut = pathBase + 'Out' + suffix;
+		expect(docPath).not.toEqual(docPathOut);
+		expect(docPath).not.toEqual(docPathComp);
+
+		const rmOutFile = async () => {
+			if (await fileExists(docPathOut)) {
+				await fs.rm(docPathOut);
+			}
+		};
+
+		await rmOutFile();
+
+		return async () => {
+			await rmOutFile();
+		};
+	});
+
+	test('file class copy does not corrupt text', async () => {
+		let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
+		let doc1 = await doc0.forEachTextBlock((s: string) => s.slice(0));
+
+		let s0: string = doc0.documentXmlString;
+		let s1: string = doc1.documentXmlString;
+		expect(s0).toEqual(s1);
+	});
+
+	test('exporter does not corrupt text', async () => {
+		let doc = await DocFile.createDocFile(await blobFromFile(docPath));
+		const outData = await doc.getDataAsZip();
+		await fs.writeFile(docPathOut, Buffer.from(await outData.arrayBuffer()));
+
+		const docXmlStringFromFile = async (path: string) => {
+			const blob = await blobFromFile(path);
+			return await DocFile.documentXMLFromZip(blob);
+		};
+
+		const b0 = await docXmlStringFromFile(docPath);
+		const b1 = await docXmlStringFromFile(docPathOut);
+		expect(b0).toStrictEqual(b1);
+	});
+
+	test('export operates as expected with stringReplace', async () => {
+		const op = async (d: DocFile) => {
+			return stringReplace(d, defaultReplacer) as Promise<DocFile>;
+		};
+
+		const outData = await performOpOnDocument(docPath, op);
+
+		let compDataExists = await fileExists(docPathComp);
+
+		/* jesus christ... now i see why they made deno */
+		const data = Buffer.from(await outData.arrayBuffer());
+		await fs.writeFile(docPathOut, data);
+		if (!compDataExists) {
+			await fs.writeFile(docPathComp, data);
+			expect.fail('Writing new comparison data for repository, please verify and re-run tests.');
+		}
+
+		expect(await getDocStrings(docPathOut)).toStrictEqual(await getDocStrings(docPathComp));
+	});
 });
