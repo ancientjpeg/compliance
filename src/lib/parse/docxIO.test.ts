@@ -14,7 +14,7 @@ const getDocStrings = async (path: string): Promise<Array<string>> => {
   const buf: Buffer = await fs.readFile(path);
   const strings = new Array<string>();
   const doc = await DocFile.createDocFile(new Blob([buf]));
-  await doc.forEachTextBlock((s: string) => {
+  doc.forEachTextBlock((s: string) => {
     strings.push(s);
     return s;
   });
@@ -41,11 +41,11 @@ const blobFromFile = async (path: string): Promise<Blob> => {
 
 const performOpOnDocument = async (
   path: string,
-  op: (doc: DocFile) => Promise<DocFile>,
+  op: (doc: DocFile) => DocFile,
 ): Promise<Blob> => {
   const docFile = await DocFile.createDocFile(await blobFromFile(path));
 
-  const docFileReplaced = await op(docFile);
+  const docFileReplaced = op(docFile);
   return docFileReplaced.getDataAsZip();
 };
 
@@ -113,7 +113,7 @@ describe.each(testFiles)("Docx", (filePath) => {
 
   test("file class copy does not corrupt text", async () => {
     let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
-    let doc1 = await doc0.forEachTextBlock((s: string) => s.slice(0));
+    let doc1 = doc0.forEachTextBlock((s: string) => s.slice(0));
 
     let s0: string = doc0.documentXmlString;
     let s1: string = doc1.documentXmlString;
@@ -136,8 +136,8 @@ describe.each(testFiles)("Docx", (filePath) => {
   });
 
   test("export operates as expected with stringReplace", async () => {
-    const op = async (d: DocFile) => {
-      return stringReplace(d, defaultReplacer) as Promise<DocFile>;
+    const op = (d: DocFile) => {
+      return stringReplace(d, defaultReplacer) as DocFile;
     };
 
     const outData = await performOpOnDocument(docPath, op);
