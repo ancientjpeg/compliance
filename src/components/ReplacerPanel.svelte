@@ -47,8 +47,9 @@
     }
   };
 
-  const output = $derived(transformToOutput(userInput, defaultReplacer));
-  console.log((() => output)());
+  const output = $derived(
+    transformToOutput(userInput.data, userInput.filename, defaultReplacer),
+  );
 
   const disabled = isDoc(userInput);
 
@@ -59,7 +60,7 @@
   class={`flex flex-col md:flex-row justify-evenly items-center content-center gap-4 ${className}`}
 >
   <ReplacerBox class={boxClass}>
-    {#snippet button(style: string)}
+    {#snippet button(style: string, _: string)}
       <FileInput class={style} {onFilesChanged} />
     {/snippet}
     {#snippet textarea(style: string)}

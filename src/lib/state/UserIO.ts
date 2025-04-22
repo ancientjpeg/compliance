@@ -28,17 +28,18 @@ export async function updateUserInput(input: UserData) {
 
 /** TODO refactor */
 export type UserDataOutput = {
-  text: UserText;
+  data: UserText;
   filename: string;
   diff: DiffChunk<string>[];
 };
 
 export function transformToOutput(
-  input: UserData,
+  input: string | DocFile,
+  filename: string | undefined,
   replacer: Replacer,
 ): UserDataOutput | null {
-  const getTextAsString = (t: UserData): string =>
-    isDoc(t) ? t.data.getText() : t.data;
+  const getTextAsString = (t: string | DocFile): string =>
+    t instanceof DocFile ? t.getText() : t;
 
   const text = getTextAsString(input);
 
@@ -46,15 +47,13 @@ export function transformToOutput(
     return null;
   }
 
-  const finalText = stringReplace(text, replacer) as string;
-  if (typeof finalText !== "string") {
-    throw new Error("bad text type");
-  }
+  const finalText = stringReplace(input, replacer);
+  let finalTextString = getTextAsString(finalText);
 
-  const filename = getOutputFilename(input.filename);
-  const diffEntries = wordDiff(text, finalText);
+  filename = getOutputFilename(filename);
+  const diffEntries = wordDiff(text, finalTextString);
   return {
-    text: finalText,
+    data: finalText,
     filename: filename,
     diff: diffEntries,
   };

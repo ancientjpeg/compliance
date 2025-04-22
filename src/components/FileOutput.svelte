@@ -16,7 +16,7 @@
       return new Promise<Blob>(() => {});
     }
 
-    const t = data.text;
+    const t = data.data;
     if (t instanceof DocFile) {
       return await t.getDataAsZip();
     } else {
