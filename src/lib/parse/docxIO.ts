@@ -30,6 +30,10 @@ export function forEachTextBlockInXMLString(xml: string, fn: (s: string) => stri
 	return stringOut;
 }
 
+/**
+ * A class encapsulating a .docx-file. Designed to be quasi-RAII, in that there
+ * a DocFile is immutable, and any edits will create a new DocFile.
+ */
 export class DocFile {
 	/**
 	 * @note #data is not updated past ctor, it's just used as a reference point
@@ -66,7 +70,10 @@ export class DocFile {
 		return new DocFile(fileData, xmlObject);
 	}
 
-	/** May throw iff `!this.loaded`. Returns a deep copy of `this` */
+	/**
+	 * May throw iff `!this.loaded`. Returns a deep copy of `this`.
+	 * `this` is not modified (DocFile is immutable).
+	 */
 	async forEachTextBlock(fn: (s: string) => string): Promise<DocFile> {
 		this.#checkLoaded();
 		const newData = this.#data.slice();
@@ -90,6 +97,7 @@ export class DocFile {
 		return this.#xmlString;
 	}
 
+	/* Returns a blob containing the zip-encoded docx file with any modifications. */
 	async getDataAsZip(): Promise<Blob> {
 		const xmlDataString = this.documentXmlString;
 		const zipFile = await JSZip.loadAsync(await this.#data.arrayBuffer());
