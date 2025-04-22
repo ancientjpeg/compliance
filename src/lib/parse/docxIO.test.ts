@@ -120,6 +120,18 @@ describe.each(testFiles)("Docx", (filePath) => {
     expect(s0).toEqual(s1);
   });
 
+  test("parser does not miss tags", async () => {
+    let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
+    const found = /<w:t.*>/gms.test(doc0.getText());
+    console.log(doc0.getText());
+    expect(found).toBeFalsy();
+    let doc1 = doc0.forEachTextBlock((s: string) => s.slice(0));
+
+    let s0: string = doc0.documentXmlString;
+    let s1: string = doc1.documentXmlString;
+    expect(s0).toEqual(s1);
+  });
+
   test("exporter does not corrupt text", async () => {
     let doc = await DocFile.createDocFile(await blobFromFile(docPath));
     const outData = await doc.getDataAsZip();
