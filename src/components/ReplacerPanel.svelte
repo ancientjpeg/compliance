@@ -1,5 +1,7 @@
 <script lang="ts">
+  import type { UserData } from "$lib/state/userInput.svelte";
   import ReplacerBox from "./ReplacerBox.svelte";
+
   type Props = {
     class: string;
   };
@@ -12,6 +14,10 @@
 <div
   class={`flex flex-col md:flex-row justify-evenly items-center content-center gap-4 ${className}`}
 >
-  <ReplacerBox></ReplacerBox>
-  <ReplacerBox></ReplacerBox>
+  <ReplacerBox class={sharedClass} buttonText="SelectFileToDownload">
+    {#snippet button(style: string)}
+      <div class={style}></div>
+    {/snippet}
+  </ReplacerBox>
+  <!-- <ReplacerBox class={sharedClass}></ReplacerBox> -->
 </div>
