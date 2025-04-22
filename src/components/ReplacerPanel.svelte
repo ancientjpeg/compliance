@@ -12,8 +12,6 @@
 
   let { class: className }: Props = $props();
 
-  const sharedClass = "grow-0 basis-4/10 w-8/10 h-8/10";
-
   const getText = () => {
     if (isDoc(userInput)) {
       return userInput.data.getText();
@@ -34,9 +32,12 @@
     }
   };
 
-  const output = transformToOutput(userInput, defaultReplacer);
+  $inspect(userInput);
+  const output = $derived(transformToOutput(userInput, defaultReplacer));
 
   const disabled = isDoc(userInput);
+
+  const sharedClass = "grow-0 basis-4/10 w-8/10 h-8/10";
 </script>
 
 <div
@@ -44,7 +45,7 @@
 >
   <ReplacerBox class={sharedClass}>
     {#snippet button(style: string)}
-      <div class={style}>button</div>
+      <button class={style}>button</button>
     {/snippet}
     {#snippet textarea(style: string)}
       <textarea {disabled} class={style} bind:value={getText, setText}>

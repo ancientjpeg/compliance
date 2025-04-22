@@ -28,20 +28,23 @@ export async function updateUserInput(input: UserData) {
 
 /** TODO refactor */
 export type UserDataOutput = {
-  text: Promise<UserText>;
+  text: UserText;
   filename: string;
   diff: DiffChunk<string>[];
 };
 
-export async function transformToOutput(
+export function transformToOutput(
   input: UserData,
   replacer: Replacer,
-): Promise<UserDataOutput> {
-  const getTextAsString = async (t: UserData): Promise<string> =>
+): UserDataOutput {
+  const getTextAsString = (t: UserData): string =>
     isDoc(t) ? t.data.getText() : t.data;
 
   const text = getTextAsString(input);
-  const finalText = stringReplace(text, replacer);
+  const finalText = stringReplace(text, replacer) as string;
+  if (typeof finalText !== "string") {
+    throw new Error("bad text type");
+  }
 
   const filename = getOutputFilename(input.filename);
   const diffEntries = wordDiff(text, finalText);

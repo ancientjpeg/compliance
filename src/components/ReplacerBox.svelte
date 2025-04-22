@@ -17,13 +17,15 @@
     disabled: isDisabled,
   }: Props = $props();
 
-  const disabled = isDisabled;
+  const buttonInactiveStyle = "basis-8 flex justify-center items-center";
+  const buttonSharedStyle = `${buttonInactiveStyle} active:bg-gray-400 hover:bg-gray-200`;
 </script>
 
-<div class={`${className}`}>
-  <!-- <button onclick={buttonAction}>{buttonText}</button> -->
-  <!-- <textarea {disabled} bind:value={bindableText}></textarea> -->
-  {@render button("bg-red-500")}
+<div
+  class={`${className} flex flex-col border-default rounded-default overflow-hidden`}
+>
+  {@render button(buttonSharedStyle)}
+  <div class="basis-[var(--border-size)] bg-black"></div>
   {@render textarea(
     "grow-1 basis-0 overflow-scroll resize-none p-4 text-neutral-400 enabled:text-black",
   )}
