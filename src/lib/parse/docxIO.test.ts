@@ -101,9 +101,9 @@ describe.each(testFiles)('Docx', (filePath) => {
 
 		await rmOutFile();
 
-		// return async () => {
-		// 	await rmOutFile();
-		// };
+		return async () => {
+			await rmOutFile();
+		};
 	});
 
 	test('exporter does not corrupt text', async () => {
@@ -117,12 +117,12 @@ describe.each(testFiles)('Docx', (filePath) => {
 		const outData = await doc1.getDataAsZip();
 		await fs.writeFile(docPathOut, Buffer.from(await outData.arrayBuffer()));
 
-		const bytesFromDocXML = async (path: string) => {
-			return await (await DocFile.docXMLBlobFromZipBlob(await blobFromFile(path))).bytes();
+		const arrayBufferFromDocXML = async (path: string) => {
+			return await (await DocFile.docXMLBlobFromZipBlob(await blobFromFile(path))).arrayBuffer();
 		};
 
-		const b0 = await bytesFromDocXML(docPath);
-		const b1 = await bytesFromDocXML(docPathOut);
+		const b0 = await arrayBufferFromDocXML(docPath);
+		const b1 = await arrayBufferFromDocXML(docPathOut);
 		expect(b0.byteLength).toStrictEqual(b1.byteLength);
 		expect(b0).toStrictEqual(b1);
 	});
@@ -140,6 +140,7 @@ describe.each(testFiles)('Docx', (filePath) => {
 		await fs.writeFile(docPathOut, data);
 		if (!compDataExists) {
 			await fs.writeFile(docPathComp, data);
+			expect.fail('Writing new comparison data for repository, please verify and re-run tests.');
 		}
 
 		expect(await getDocStrings(docPathOut)).toStrictEqual(await getDocStrings(docPathComp));
