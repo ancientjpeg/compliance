@@ -7,6 +7,7 @@
   import { DocFile } from "$lib/parse/docxIO";
   import { isDoc, transformToOutput, updateUserInput } from "$lib/state/UserIO";
   import { userInput } from "$lib/state/userInput.svelte";
+  import FileOutput from "./FileOutput.svelte";
 
   type Props = {
     class: string;
@@ -34,7 +35,6 @@
     }
   };
 
-  $inspect(userInput);
   const output = $derived(transformToOutput(userInput, defaultReplacer));
 
   const disabled = isDoc(userInput);
@@ -69,7 +69,7 @@
 
   <ReplacerBox class={sharedClass}>
     {#snippet button(style: string)}
-      <div class={style}>button</div>
+      <FileOutput class={style} data={output} />
     {/snippet}
     {#snippet textarea(style: string)}
       <DiffDisplay class={style} data={output} />

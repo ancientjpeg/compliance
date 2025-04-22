@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { UserData } from "$lib/state/userInput.svelte";
-  import { isDoc } from "$lib/state/UserIO";
   import type { Snippet } from "svelte";
 
   type Props = {
@@ -10,12 +8,7 @@
     disabled?: boolean;
   };
 
-  let {
-    button,
-    textarea,
-    class: className,
-    disabled: isDisabled,
-  }: Props = $props();
+  let { button, textarea, class: className }: Props = $props();
 
   const buttonInactiveStyle = "basis-8 flex justify-center items-center";
   const buttonSharedStyle = `${buttonInactiveStyle} active:bg-gray-400 hover:bg-gray-200`;

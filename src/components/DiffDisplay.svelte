@@ -4,26 +4,24 @@
 
   type Props = {
     class: string;
-    data: Promise<UserDataOutput>;
+    data: UserDataOutput;
   };
 
   let { class: className, data }: Props = $props();
 </script>
 
 <p placeholder={"Text will output here."} class={className}>
-  {#await data then output}
-    {#each output.diff as diffEntry}
-      {#if diffEntry.op == DiffChunkOp.Equal}
+  {#each data.diff as diffEntry}
+    {#if diffEntry.op == DiffChunkOp.Equal}
+      {diffEntry.data}
+    {:else if diffEntry.op == DiffChunkOp.Insert}
+      <span class="text-green-500 bg-green-100">
         {diffEntry.data}
-      {:else if diffEntry.op == DiffChunkOp.Insert}
-        <span class="text-green-500 bg-green-100">
-          {diffEntry.data}
-        </span>
-      {:else if diffEntry.op == DiffChunkOp.Delete}
-        <span class="text-red-500 bg-red-100">
-          {diffEntry.data}
-        </span>
-      {/if}
-    {/each}
-  {/await}
+      </span>
+    {:else if diffEntry.op == DiffChunkOp.Delete}
+      <span class="text-red-500 bg-red-100">
+        {diffEntry.data}
+      </span>
+    {/if}
+  {/each}
 </p>
