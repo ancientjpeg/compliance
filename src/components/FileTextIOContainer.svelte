@@ -35,7 +35,7 @@
 </script>
 
 <div
-	class={`bg-white border-black border-2 rounded-default flex flex-col ${className} overflow-hidden`}
+	class={`bg-white border-black border-default rounded-default flex flex-col ${className} overflow-hidden`}
 >
 	{#if isInput}
 		<FileInput class={buttonSharedStyle} {onFilesChanged} />
