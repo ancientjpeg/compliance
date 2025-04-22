@@ -2,7 +2,8 @@
   import type { Snippet } from "svelte";
 
   type Props = {
-    button: Snippet<[string]>;
+    /* takes active  and inactive styles */
+    button: Snippet<[string, string]>;
     textarea: Snippet<[string]>;
     class?: string;
     disabled?: boolean;
@@ -17,7 +18,7 @@
 <div
   class={`${className} flex flex-col border-default rounded-default overflow-hidden`}
 >
-  {@render button(buttonSharedStyle)}
+  {@render button(buttonSharedStyle, buttonInactiveStyle)}
   <div class="basis-[var(--border-size)] bg-black"></div>
   {@render textarea(
     "grow-1 basis-0 overflow-scroll resize-none p-4 text-neutral-400 enabled:text-black",

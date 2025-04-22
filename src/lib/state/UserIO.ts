@@ -36,11 +36,16 @@ export type UserDataOutput = {
 export function transformToOutput(
   input: UserData,
   replacer: Replacer,
-): UserDataOutput {
+): UserDataOutput | null {
   const getTextAsString = (t: UserData): string =>
     isDoc(t) ? t.data.getText() : t.data;
 
   const text = getTextAsString(input);
+
+  if (text.length === 0) {
+    return null;
+  }
+
   const finalText = stringReplace(text, replacer) as string;
   if (typeof finalText !== "string") {
     throw new Error("bad text type");

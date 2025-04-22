@@ -4,9 +4,9 @@
   import { type Action } from "svelte/action";
 
   type Props = {
-    data: UserDataOutput;
-    class?: string;
-    inactiveClass?: string;
+    data: UserDataOutput | null;
+    class: string;
+    inactiveClass: string;
   };
 
   const { data, class: className, inactiveClass }: Props = $props();
@@ -15,6 +15,7 @@
     if (data === null) {
       return new Promise<Blob>(() => {});
     }
+
     const t = data.text;
     if (t instanceof DocFile) {
       return await t.getDataAsZip();
@@ -37,13 +38,15 @@
       };
     });
   };
+
+  const fname = $derived(data?.filename ?? "");
 </script>
 
 {#await hrefPromise}
   <div class={inactiveClass}>Waiting For Input...</div>
 {:then href}
-  <a use:linkLoad={href} {href} download={data!.filename} class={className}>
-    Download {data!.filename}
+  <a use:linkLoad={href} {href} download={fname} class={className}>
+    Download {fname}
   </a>
 {:catch err}
   <div class={inactiveClass}>Got error preparing download: {err}</div>
