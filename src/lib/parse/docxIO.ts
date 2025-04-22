@@ -46,24 +46,23 @@ export class DocFile {
 		this.#checkLoaded();
 	}
 
-	static async docXMLBlobFromZipBlob(fileData: Blob): Promise<Blob> {
+	/**
+	 * @returns The text of the word/document.xml file contained within the
+	 * zip-encoded data contained in `fileData`.
+	 */
+	static async documentXMLFromZip(fileData: Blob): Promise<string> {
 		const zipFile = await JSZip.loadAsync(await fileData.arrayBuffer());
 		const doc = zipFile.file(DocFile.#docPath);
 		if (doc === null) {
 			throw Error('Unable to find expected document.xml in unzipped word doc');
 		}
 
-		return doc.async('blob');
-	}
-
-	/* Gets document XML as a string from a docx zip blob. separated from `createDocFile` for testing. */
-	static async docXMLDataFromZipBlob(fileData: Blob): Promise<string> {
-		return (await DocFile.docXMLBlobFromZipBlob(fileData)).text();
+		return doc.async('text');
 	}
 
 	/* Create a DocFile. Takes ownership of fileData. */
 	static async createDocFile(fileData: Blob): Promise<DocFile> {
-		const xmlObject = await this.docXMLDataFromZipBlob(fileData);
+		const xmlObject = await this.documentXMLFromZip(fileData);
 		return new DocFile(fileData, xmlObject);
 	}
 

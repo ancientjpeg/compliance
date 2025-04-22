@@ -106,24 +106,27 @@ describe.each(testFiles)('Docx', (filePath) => {
 		};
 	});
 
-	test('exporter does not corrupt text', async () => {
+	test('file class copy does not corrupt text', async () => {
 		let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
 		let doc1 = await doc0.forEachTextBlock((s: string) => s.slice(0));
 
 		let s0: string = doc0.documentXmlString;
 		let s1: string = doc1.documentXmlString;
 		expect(s0).toEqual(s1);
+	});
 
-		const outData = await doc1.getDataAsZip();
+	test('exporter does not corrupt text', async () => {
+		let doc = await DocFile.createDocFile(await blobFromFile(docPath));
+		const outData = await doc.getDataAsZip();
 		await fs.writeFile(docPathOut, Buffer.from(await outData.arrayBuffer()));
 
-		const arrayBufferFromDocXML = async (path: string) => {
-			return await (await DocFile.docXMLBlobFromZipBlob(await blobFromFile(path))).arrayBuffer();
+		const docXmlStringFromFile = async (path: string) => {
+			const blob = await blobFromFile(path);
+			return await DocFile.documentXMLFromZip(blob);
 		};
 
-		const b0 = await arrayBufferFromDocXML(docPath);
-		const b1 = await arrayBufferFromDocXML(docPathOut);
-		expect(b0.byteLength).toStrictEqual(b1.byteLength);
+		const b0 = await docXmlStringFromFile(docPath);
+		const b1 = await docXmlStringFromFile(docPathOut);
 		expect(b0).toStrictEqual(b1);
 	});
 
@@ -135,6 +138,7 @@ describe.each(testFiles)('Docx', (filePath) => {
 		const outData = await performOpOnDocument(docPath, op);
 
 		let compDataExists = await fileExists(docPathComp);
+
 		/* jesus christ... now i see why they made deno */
 		const data = Buffer.from(await outData.arrayBuffer());
 		await fs.writeFile(docPathOut, data);
