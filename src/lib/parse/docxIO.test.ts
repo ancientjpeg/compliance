@@ -1,7 +1,7 @@
 import { test, expect, describe, beforeEach } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
-import { DocFile, forEachTextBlockInXMLString } from './docxIO';
+import { DocFile, forEachDocxXmlTextBlock } from './docxIO';
 import stringReplace from '$lib/stringReplace';
 import defaultReplacer from '$lib/defaultReplacer';
 
@@ -74,7 +74,7 @@ text </w:t>
 		detectedStrings.push(s);
 		return s.replace(/Text to(.*?)replace/gms, 'Replaced$1text');
 	};
-	const newXml = forEachTextBlockInXMLString(testXmlString, op);
+	const newXml = forEachDocxXmlTextBlock(testXmlString, op);
 
 	expect(detectedStrings).toStrictEqual(expectedStrings);
 	expect(newXml).toStrictEqual(expectedXmlString);

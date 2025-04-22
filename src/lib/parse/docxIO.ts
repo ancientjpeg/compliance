@@ -1,6 +1,10 @@
 import JSZip from 'jszip';
 
-export function forEachTextBlockInXMLString(xml: string, fn: (s: string) => string): string {
+/**
+ * Takes a string representing a .docx-compliant XML file and performs `fn`
+ * on all visible text in the document. Returns a new string with the edits.
+ */
+export function forEachDocxXmlTextBlock(xml: string, fn: (s: string) => string): string {
 	const re = new RegExp('(<w:t[^>]*>)(.*?)(</w:t>)', 'gms');
 	let blocks: [number, number][] = [];
 	for (const match of xml.matchAll(re)) {
@@ -39,7 +43,6 @@ export class DocFile {
 	 * @note #data is not updated past ctor, it's just used as a reference point
 	 * when reconstructing the docx zip.
 	 */
-
 	#data: Blob;
 	#xmlString: string;
 	static #docPath: string = 'word/document.xml';
@@ -77,7 +80,7 @@ export class DocFile {
 	async forEachTextBlock(fn: (s: string) => string): Promise<DocFile> {
 		this.#checkLoaded();
 		const newData = this.#data.slice();
-		const newXmlString = forEachTextBlockInXMLString(this.#xmlString, fn);
+		const newXmlString = forEachDocxXmlTextBlock(this.#xmlString, fn);
 		return new DocFile(newData, newXmlString);
 	}
 
