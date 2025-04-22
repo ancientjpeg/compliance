@@ -84,6 +84,7 @@ export class DocFile {
 		return new DocFile(newData, newXmlString);
 	}
 
+	/* Return all visible text in the .docx file. Text tags are joined by newlines. */
 	async getText() {
 		this.#checkLoaded();
 		let ret: string = '';
