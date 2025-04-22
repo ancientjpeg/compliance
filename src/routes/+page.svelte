@@ -1,13 +1,11 @@
 <script lang="ts">
-  import FileTextIoContainer from "$components/FileTextIOContainer.svelte";
-
-  let showPopup = $state(false);
+  import ReplacerPanel from "$components/ReplacerPanel.svelte";
 </script>
 
 <div
   class="grow-1 flex flex-col items-center justify-center m-4 sm:m-8 border-default rounded-default border-black box-border"
 >
-  <h1 class="text-3xl grow-1 flex basis-12 md:basis-18 items-center">
+  <h1 class="text-3xl grow-1 flex basis-8 md:basis-12 items-center">
     &#x2728 compliance &#x2728
   </h1>
   <p class="grow-0 basis-0 w-3/4 text-center">
@@ -20,18 +18,5 @@
       recently unveiled list of words banned by the NSF
     </a>.
   </p>
-  <div
-    class="flex flex-col md:flex-row justify-evenly items-center content-center grow-6 w-full gap-4"
-  >
-    {#if showPopup}
-      <div>!!!!</div>
-    {:else}
-      {#each [true, false] as isInput}
-        <FileTextIoContainer
-          class="grow-0 basis-4/10 w-8/10 h-8/10"
-          {isInput}
-        />
-      {/each}
-    {/if}
-  </div>
+  <ReplacerPanel class="grow-6 w-full"></ReplacerPanel>
 </div>
