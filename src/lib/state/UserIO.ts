@@ -7,6 +7,8 @@ import type { DiffChunk } from "$lib/diff/diffTypes";
 import type { Replacer } from "$lib/replacer";
 import type { UserData, UserText } from "./userInput.svelte";
 
+export const isDoc = (d: UserData) => d.data instanceof DocFile;
+
 function getOutputFilename(filename: string | undefined) {
   if (!filename) {
     return "compliant.txt";
@@ -18,21 +20,9 @@ function getOutputFilename(filename: string | undefined) {
   }
 }
 
-export async function updateUserInput(
-  text: string | DocFile,
-  filename: string | undefined = undefined,
-) {
-  const isDoc = text instanceof DocFile;
-
-  if (isDoc) {
-    userInput.doc = text;
-    userInput.text = await text.getText();
-  } else {
-    userInput.text = text;
-    userInput.doc = undefined;
-  }
-
-  userInput.filename = filename;
+export async function updateUserInput(input: UserData) {
+  userInput.data = input.data;
+  userInput.filename = input.filename;
 }
 
 /** TODO refactor */
