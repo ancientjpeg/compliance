@@ -36,22 +36,18 @@ export type UserDataOutput = {
 export async function transformToOutput(
   input: UserData,
   replacer: Replacer,
-): Promise<UserDataOutput | null> {
-  const getTextAsString = async (t: UserText): Promise<string> =>
-    t instanceof DocFile ? await t.getText() : t;
+): Promise<UserDataOutput> {
+  const getTextAsString = async (t: UserData): Promise<string> =>
+    isDoc(t) ? t.data.getText() : t.data;
 
-  const finalTextPromise = stringReplace(input.text, replacer);
-
-  const textAsString = await getTextAsString(input.text);
-
-  if (textAsString.length == 0) {
-    return null;
-  }
-
-  const finalTextAsString = await getTextAsString(await finalTextPromise);
+  const text = getTextAsString(input);
+  const finalText = stringReplace(text, replacer);
 
   const filename = getOutputFilename(input.filename);
-
-  const diffEntries = wordDiff(textAsString, finalTextAsString);
-  return { text: finalTextPromise, filename, diff: diffEntries };
+  const diffEntries = wordDiff(text, finalText);
+  return {
+    text: finalText,
+    filename: filename,
+    diff: diffEntries,
+  };
 }

@@ -5,7 +5,7 @@
 
   type Props = {
     button: Snippet<[string]>;
-    textarea: Snippet;
+    textarea: Snippet<[string]>;
     class?: string;
     disabled?: boolean;
   };
@@ -20,8 +20,11 @@
   const disabled = isDisabled;
 </script>
 
-<div class={`${className} bg-green-500`}>
+<div class={`${className}`}>
   <!-- <button onclick={buttonAction}>{buttonText}</button> -->
   <!-- <textarea {disabled} bind:value={bindableText}></textarea> -->
   {@render button("bg-red-500")}
+  {@render textarea(
+    "grow-1 basis-0 overflow-scroll resize-none p-4 text-neutral-400 enabled:text-black",
+  )}
 </div>
