@@ -2,9 +2,11 @@
   import ReplacerBox from "./ReplacerBox.svelte";
   import DiffDisplay from "./DiffDisplay.svelte";
 
-  import { userInput } from "$lib/state/userInput.svelte";
-  import { isDoc, transformToOutput, updateUserInput } from "$lib/state/UserIO";
+  import FileInput from "./FileInput.svelte";
   import defaultReplacer from "$lib/defaultReplacer";
+  import { DocFile } from "$lib/parse/docxIO";
+  import { isDoc, transformToOutput, updateUserInput } from "$lib/state/UserIO";
+  import { userInput } from "$lib/state/userInput.svelte";
 
   type Props = {
     class: string;
@@ -38,6 +40,18 @@
   const disabled = isDoc(userInput);
 
   const sharedClass = "grow-0 basis-4/10 w-8/10 h-8/10";
+
+  const onFilesChanged = async (fileName: string, fileData: Blob) => {
+    const ext = fileName.split(".").pop();
+    let text: DocFile | string;
+    if (ext == "docx") {
+      text = await DocFile.createDocFile(fileData);
+      updateUserInput({ kind: "doc", data: text, filename: fileName });
+    } else {
+      text = await fileData.text();
+      updateUserInput({ kind: "text", data: text, filename: undefined });
+    }
+  };
 </script>
 
 <div
@@ -45,7 +59,7 @@
 >
   <ReplacerBox class={sharedClass}>
     {#snippet button(style: string)}
-      <button class={style}>button</button>
+      <FileInput class={style} {onFilesChanged} />
     {/snippet}
     {#snippet textarea(style: string)}
       <textarea {disabled} class={style} bind:value={getText, setText}>
