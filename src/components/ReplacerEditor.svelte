@@ -1,6 +1,8 @@
 <script lang="ts">
+  import type { Replacer } from "$lib/state/replacer";
   import {
     attemptReplacerUpdate,
+    createReplacerFromText,
     replacer,
     resetReplacer,
   } from "$lib/state/replacer.svelte";
@@ -15,6 +17,16 @@
     JSON.stringify(Object.fromEntries(replacer), null, 2),
   );
 
+  const validatedReplacer = $derived.by((): Replacer | null => {
+    try {
+      return createReplacerFromText(replacerString);
+    } catch {}
+    return null;
+  });
+
+  const valid = $derived(validatedReplacer !== null);
+  const bg = $derived(valid ? "" : "bg-red-500");
+
   const setAsReplacer = () => {
     try {
       attemptReplacerUpdate(replacerString);
@@ -25,7 +37,7 @@
   };
 </script>
 
-<div class={`${className} flex flex-col`}>
+<div class={`${className} ${bg} flex flex-col`}>
   <svelte:boundary>
     <button class="basis-8" onclick={setAsReplacer}>Set as replacer</button>
     <textarea bind:value={replacerString} class="w-full h-full"></textarea>
