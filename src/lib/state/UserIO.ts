@@ -55,7 +55,7 @@ export function transformToOutput(
   const diffEntries = wordDiff(text, finalTextString);
 
   const diffEntriesProcessed = diffEntries.map((entry) => {
-    const maxStrlen = 50;
+    const maxStrlen = 100;
     if (entry.op != DiffChunkOp.Equal || entry.data.length <= maxStrlen) {
       return entry;
     }
