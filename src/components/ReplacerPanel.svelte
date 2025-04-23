@@ -51,7 +51,7 @@
     transformToOutput(userInput.data, userInput.filename, defaultReplacer),
   );
 
-  const disabled = isDoc(userInput);
+  const disabled = $derived(isDoc(userInput));
 
   const boxClass = "grow-0 basis-4/10 w-8/10 h-8/10";
 </script>
