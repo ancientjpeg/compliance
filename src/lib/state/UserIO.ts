@@ -3,7 +3,7 @@ import stringReplace from "$lib/stringReplace";
 import { DocFile } from "$lib/parse/docxIO";
 import { userInput } from "./userInput.svelte";
 
-import type { DiffChunk } from "$lib/diff/diffTypes";
+import { DiffChunkOp, type DiffChunk } from "$lib/diff/diffTypes";
 import type { Replacer } from "$lib/replacer";
 import type { UserData, UserText } from "./userInput.svelte";
 
@@ -51,10 +51,29 @@ export function transformToOutput(
   let finalTextString = getTextAsString(finalText);
 
   filename = getOutputFilename(filename);
+
   const diffEntries = wordDiff(text, finalTextString);
+
+  const diffEntriesProcessed = diffEntries.map((entry) => {
+    const maxStrlen = 50;
+    if (entry.op != DiffChunkOp.Equal || entry.data.length <= maxStrlen) {
+      return entry;
+    }
+    const chunkLen = Math.floor((maxStrlen - 3) / 2);
+    const newData =
+      entry.data.slice(0, chunkLen) +
+      "..." +
+      entry.data.slice(-chunkLen, entry.data.length);
+    const newEntry = {
+      op: entry.op,
+      data: newData,
+    };
+    return newEntry;
+  });
+
   return {
     data: finalText,
     filename: filename,
-    diff: diffEntries,
+    diff: diffEntriesProcessed,
   };
 }
