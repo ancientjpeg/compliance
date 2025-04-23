@@ -8,7 +8,7 @@ export function forEachDocxXmlTextBlock(
   xml: string,
   fn: (s: string) => string,
 ): string {
-  const re = new RegExp("(<w:t[^>]*>)(.*?)(</w:t>)", "gms");
+  const re = new RegExp("(<w:t>|<w:t .*?>)(.*?)(</w:t>)", "gms");
   let blocks: [number, number][] = [];
   for (const match of xml.matchAll(re)) {
     const start = match.index + match[1].length;
@@ -80,7 +80,7 @@ export class DocFile {
    * May throw iff `!this.loaded`. Returns a deep copy of `this`.
    * `this` is not modified (DocFile is immutable).
    */
-  async forEachTextBlock(fn: (s: string) => string): Promise<DocFile> {
+  forEachTextBlock(fn: (s: string) => string): DocFile {
     this.#checkLoaded();
     const newData = this.#data.slice();
     const newXmlString = forEachDocxXmlTextBlock(this.#xmlString, fn);
@@ -88,10 +88,10 @@ export class DocFile {
   }
 
   /* Return all visible text in the .docx file. Text tags are joined by newlines. */
-  async getText() {
+  getText() {
     this.#checkLoaded();
     let ret: string = "";
-    await this.forEachTextBlock((s) => {
+    this.forEachTextBlock((s) => {
       ret += s + "\n";
       return s;
     });

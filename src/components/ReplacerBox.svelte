@@ -1,0 +1,27 @@
+<script lang="ts">
+  import type { Snippet } from "svelte";
+
+  type Props = {
+    /* takes active  and inactive styles */
+    button: Snippet<[string, string]>;
+    textarea: Snippet<[string]>;
+    class?: string;
+    disabled?: boolean;
+  };
+
+  let { button, textarea, class: className }: Props = $props();
+
+  const buttonBaseStyle = "basis-8 flex justify-center items-center";
+  const buttonInactiveStyle = `${buttonBaseStyle} text-gray-400`;
+  const buttonActiveStyle = `${buttonBaseStyle} text-black active:bg-gray-400 hover:bg-gray-200`;
+</script>
+
+<div
+  class={`${className} flex flex-col border-default rounded-default overflow-hidden`}
+>
+  {@render button(buttonActiveStyle, buttonInactiveStyle)}
+  <div class="basis-[var(--border-size)] bg-black"></div>
+  {@render textarea(
+    "grow-1 basis-0 overflow-scroll resize-none p-4 text-neutral-400 enabled:text-black",
+  )}
+</div>

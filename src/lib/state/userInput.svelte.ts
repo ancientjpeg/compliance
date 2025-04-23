@@ -1,13 +1,19 @@
 import { DocFile } from "$lib/parse/docxIO";
 export type UserText = DocFile | string;
-export type UserData = {
-  text: string;
-  doc: DocFile | undefined;
-  filename: string | undefined;
-};
+export type UserData =
+  | {
+      kind: "doc";
+      data: DocFile;
+      filename: string;
+    }
+  | {
+      kind: "text";
+      data: string;
+      filename: undefined;
+    };
 
 export const userInput: UserData = $state({
-  text: "",
-  doc: undefined,
+  kind: "text",
+  data: "",
   filename: undefined,
 });
