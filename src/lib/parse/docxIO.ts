@@ -8,7 +8,7 @@ export function forEachDocxXmlTextBlock(
   xml: string,
   fn: (s: string) => string,
 ): string {
-  const re = new RegExp("(<w:t[^>]*>)(.*?)(</w:t>)", "gms");
+  const re = new RegExp("(<w:t>|<w:t .*?>)(.*?)(</w:t>)", "gms");
   let blocks: [number, number][] = [];
   for (const match of xml.matchAll(re)) {
     const start = match.index + match[1].length;

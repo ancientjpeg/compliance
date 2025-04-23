@@ -49,28 +49,30 @@ const performOpOnDocument = async (
   return docFileReplaced.getDataAsZip();
 };
 
-test("XML Parser", async () => {
+test("XML parser preserves standard text content", () => {
   const testXmlString = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <w:document>
 <w:t xml:space="preserve"> Text to replace </w:t>
-<w:t> Text to 
+<w:t>. Text to 
 replace </w:t>
 <w:t> Text to keep </w:t>
+<w:tbad> Don't capture this! </w:tbad>
 </w:document>\r\n`;
 
   const expectedXmlString = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <w:document>
 <w:t xml:space="preserve"> Replaced text </w:t>
-<w:t> Replaced 
+<w:t>. Replaced 
 text </w:t>
 <w:t> Text to keep </w:t>
+<w:tbad> Don't capture this! </w:tbad>
 </w:document>\r\n`;
 
   const expectedStrings = [
     " Text to replace ",
-    " Text to \nreplace ",
+    ". Text to \nreplace ",
     " Text to keep ",
   ];
   let detectedStrings: string[] = [];
@@ -122,9 +124,10 @@ describe.each(testFiles)("Docx", (filePath) => {
 
   test("parser does not miss tags", async () => {
     let doc0 = await DocFile.createDocFile(await blobFromFile(docPath));
-    const found = /<w:t.*>/gms.test(doc0.getText());
-    console.log(doc0.getText());
-    expect(found).toBeFalsy();
+    const re = new RegExp("<w:t.*?>", "gms");
+    const text = doc0.getText();
+    const matches = re.exec(text);
+    expect(matches).toBeNull();
     let doc1 = doc0.forEachTextBlock((s: string) => s.slice(0));
 
     let s0: string = doc0.documentXmlString;
