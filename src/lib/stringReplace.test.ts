@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import stringReplace from "./stringReplace";
-import defaultReplacer from "./defaultReplacer";
+import defaultReplacer from "./state/defaultReplacer";
 
 test("stringReplace replaces all words in default replacer", async () => {
   expect(defaultReplacer.get("advocates")).toBe("proponents");

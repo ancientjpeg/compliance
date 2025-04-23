@@ -4,7 +4,7 @@ import { DocFile } from "$lib/parse/docxIO";
 import { userInput } from "./userInput.svelte";
 
 import { DiffChunkOp, type DiffChunk } from "$lib/diff/diffTypes";
-import type { Replacer } from "$lib/replacer";
+import type { Replacer } from "$lib/state/replacer";
 import type { UserData, UserText } from "./userInput.svelte";
 
 export const isDoc = (d: UserData) => d.kind === "doc";

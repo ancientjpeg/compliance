@@ -1,4 +1,4 @@
-import type { Replacer } from "./state/replacer";
+import type { Replacer } from "./replacer";
 
 export default (replacer: Replacer): Map<string, [string, string]> | null => {
   let ret = new Map<string, [string, string]>();

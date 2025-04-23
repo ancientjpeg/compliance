@@ -3,7 +3,7 @@
   import DiffDisplay from "./DiffDisplay.svelte";
 
   import FileInput from "./FileInput.svelte";
-  import defaultReplacer from "$lib/defaultReplacer";
+  import defaultReplacer from "$lib/state/defaultReplacer";
   import { DocFile } from "$lib/parse/docxIO";
   import { isDoc, transformToOutput, updateUserInput } from "$lib/state/UserIO";
   import { userInput } from "$lib/state/userInput.svelte";

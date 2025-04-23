@@ -1,4 +1,4 @@
-import type { Replacer } from "./replacer";
+import type { Replacer } from "./state/replacer";
 import { DocFile } from "./parse/docxIO";
 
 const adjustReplacementCasing = (

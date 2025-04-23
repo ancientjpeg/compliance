@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
-import replacerVerify from "$lib/state/replacerVerify";
-import defaultReplacer from "./state/defaultReplacer";
+import replacerVerify from "./replacerVerify";
+import defaultReplacer from "./defaultReplacer";
 
 test("Replacer verification works as expected", () => {
   const badInput = new Map<string, string>([

@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { DocFile, forEachDocxXmlTextBlock } from "./docxIO";
 import stringReplace from "$lib/stringReplace";
-import defaultReplacer from "$lib/defaultReplacer";
+import defaultReplacer from "$lib/state/defaultReplacer";
 
 const testFiles = [
   path.resolve("./src/lib/testData/docxParserTestData.docx"),
