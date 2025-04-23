@@ -56,8 +56,8 @@ test("XML parser preserves standard text content", () => {
 <w:t xml:space="preserve"> Text to replace </w:t>
 <w:t>. Text to 
 replace </w:t>
+<w:tab/> 
 <w:t> Text to keep </w:t>
-<w:tbad> Don't capture this! </w:tbad>
 </w:document>\r\n`;
 
   const expectedXmlString = `\
@@ -66,8 +66,8 @@ replace </w:t>
 <w:t xml:space="preserve"> Replaced text </w:t>
 <w:t>. Replaced 
 text </w:t>
+<w:tab/> 
 <w:t> Text to keep </w:t>
-<w:tbad> Don't capture this! </w:tbad>
 </w:document>\r\n`;
 
   const expectedStrings = [
