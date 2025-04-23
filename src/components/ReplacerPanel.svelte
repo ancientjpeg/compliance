@@ -3,7 +3,7 @@
   import DiffDisplay from "./DiffDisplay.svelte";
 
   import FileInput from "./FileInput.svelte";
-  import defaultReplacer from "$lib/state/defaultReplacer";
+  import { replacer } from "$lib/state/replacer.svelte";
   import { DocFile } from "$lib/parse/docxIO";
   import { isDoc, transformToOutput, updateUserInput } from "$lib/state/UserIO";
   import { userInput } from "$lib/state/userInput.svelte";
@@ -48,7 +48,7 @@
   };
 
   const output = $derived(
-    transformToOutput(userInput.data, userInput.filename, defaultReplacer),
+    transformToOutput(userInput.data, userInput.filename, replacer),
   );
 
   const disabled = $derived(isDoc(userInput));
