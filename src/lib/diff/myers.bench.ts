@@ -58,3 +58,9 @@ bench(
   getSimilarBenchForLength(longLen),
   opts,
 );
+
+bench(
+  `Myers tokenized ${Math.floor(longLen / 1e6)}Mchar similar`,
+  getSimilarBenchForLength(longLen),
+  opts,
+);
