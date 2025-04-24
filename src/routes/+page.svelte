@@ -23,10 +23,10 @@
   >
     {showReplacerEditor ? "hide" : "show"} replacer editor
   </Button>
-  <h1 class="text-3xl grow-1 flex basis-8 md:basis-12 items-center">
+  <h1 class="text-3xl grow-0 flex basis-18 sm:basis-24 items-center">
     &#x2728 compliance &#x2728
   </h1>
-  <p class="grow-0 basis-0 w-3/4 text-center">
+  <p class="grow-0 basis-18 sm:basis-24 w-3/4 text-center">
     is a text-replacement tool that scans your input text and replaces it using
     a pre-defined map of target and replacement words. The default replacement
     map is based on the <a
@@ -37,8 +37,8 @@
     </a>.
   </p>
   {#if showReplacerEditor}
-    <ReplacerEditor class="grow-6 w-full" />
+    <ReplacerEditor class="grow-1 w-full" />
   {:else}
-    <ReplacerPanel class="grow-6 w-full" />
+    <ReplacerPanel class="grow-1 w-full" />
   {/if}
 </div>
