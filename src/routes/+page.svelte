@@ -1,6 +1,7 @@
 <script lang="ts">
   import ReplacerPanel from "$components/ReplacerPanel.svelte";
   import ReplacerEditor from "$components/ReplacerEditor.svelte";
+  import Button from "$components/atoms/Button.svelte";
 
   let showReplacerEditor = $state(false);
 
@@ -9,14 +10,15 @@
   };
 </script>
 
-<button
-  onclick={toggleReplacerEditor}
-  class="basis-4 border-default rounded-default hover:bg-gray-300 px-4 absolute right-0 top-.25"
-  >{showReplacerEditor ? "hide" : "show"} replacer editor</button
->
 <div
-  class="grow-1 relative flex flex-col items-center justify-center m-4 sm:m-8 border-default rounded-default border-black box-border overflow-hidden"
+  class="grow-1 absolute inset-4 sm:inset-8 flex flex-col items-center justify-center border-default rounded-default border-black box-border overflow-hidden"
 >
+  <Button
+    onclick={toggleReplacerEditor}
+    class="border-b-2 sm:border-l-2 sm:rounded-bl-default px-4 absolute block right-0 top-0 min-w-full sm:min-w-3xs h-8"
+  >
+    {showReplacerEditor ? "hide" : "show"} replacer editor
+  </Button>
   <h1 class="text-3xl grow-1 flex basis-8 md:basis-12 items-center">
     &#x2728 compliance &#x2728
   </h1>
