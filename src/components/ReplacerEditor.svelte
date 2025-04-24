@@ -100,7 +100,7 @@
       </div>
       <textarea
         bind:value={replacerString}
-        class={`p-4 w-full h-full resize-none`}
+        class={`p-4 w-full h-full resize-none outline-none`}
       ></textarea>
     {/snippet}
   </ReplacerBox>
