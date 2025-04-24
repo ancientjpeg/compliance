@@ -27,14 +27,20 @@
     &#x2728 compliance &#x2728
   </h1>
   <p class="grow-0 basis-18 sm:basis-24 w-3/4 text-center">
-    is a text-replacement tool that scans your input text and replaces it using
-    a pre-defined map of target and replacement words. The default replacement
-    map is based on the <a
-      class="inline underline"
-      href="https://docs.google.com/document/d/13XyaXb4UVyWnsc8-HyBd8Byx-zyd5Nf4x5TTacQUfv0/edit?tab=t.0"
-    >
-      recently unveiled list of words banned by the NSF
-    </a>.
+    {#if showReplacerEditor}
+      in this menu, you can edit the JSON file that is used to scan your text
+      for offending terms. Edit individual terms, or paste in JSON content!
+      [File input coming soon]
+    {:else}
+      is a text-replacement tool that scans your input text and replaces it
+      using a pre-defined map of target and replacement words. The default
+      replacement map is based on the <a
+        class="inline underline"
+        href="https://docs.google.com/document/d/13XyaXb4UVyWnsc8-HyBd8Byx-zyd5Nf4x5TTacQUfv0/edit?tab=t.0"
+      >
+        recently unveiled list of words banned by the NSF
+      </a>.
+    {/if}
   </p>
   {#if showReplacerEditor}
     <ReplacerEditor class="grow-1 w-full" />
