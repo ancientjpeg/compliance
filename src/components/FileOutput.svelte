@@ -3,13 +3,14 @@
   import { type UserDataOutput } from "$lib/state/UserIO";
   import { type Action } from "svelte/action";
 
+  import Button from "./atoms/Button.svelte";
+
   type Props = {
     data: UserDataOutput | null;
     class: string;
-    inactiveClass: string;
   };
 
-  const { data, class: className, inactiveClass }: Props = $props();
+  const { data, class: className }: Props = $props();
 
   let blobPromise: Promise<Blob> = $derived.by(async () => {
     if (data === null) {
@@ -42,12 +43,18 @@
   const fname = $derived(data?.filename ?? "");
 </script>
 
+{#snippet disabled(text: string)}
+  <Button class={className} disabled={true}>{text}</Button>
+{/snippet}
+
 {#await hrefPromise}
-  <div class={inactiveClass}>Waiting For Input...</div>
+  {@render disabled("Waiting For Input...")}
 {:then href}
-  <a use:linkLoad={href} {href} download={fname} class={className}>
-    Download {fname}
-  </a>
+  <Button class={`cursor-pointer ${className}`}>
+    <a use:linkLoad={href} {href} download={fname}>
+      Download {fname}
+    </a>
+  </Button>
 {:catch err}
-  <div class={inactiveClass}>Got error preparing download: {err}</div>
+  {@render disabled(`Got error preparing download: ${err}`)}
 {/await}

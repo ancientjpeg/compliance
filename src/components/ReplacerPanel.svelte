@@ -3,7 +3,7 @@
   import DiffDisplay from "./DiffDisplay.svelte";
 
   import FileInput from "./FileInput.svelte";
-  import defaultReplacer from "$lib/defaultReplacer";
+  import { replacer } from "$lib/state/replacer.svelte";
   import { DocFile } from "$lib/parse/docxIO";
   import { isDoc, transformToOutput, updateUserInput } from "$lib/state/UserIO";
   import { userInput } from "$lib/state/userInput.svelte";
@@ -48,7 +48,7 @@
   };
 
   const output = $derived(
-    transformToOutput(userInput.data, userInput.filename, defaultReplacer),
+    transformToOutput(userInput.data, userInput.filename, replacer),
   );
 
   const disabled = $derived(isDoc(userInput));
@@ -60,7 +60,7 @@
   class={`flex flex-col md:flex-row justify-evenly items-center content-center gap-4 ${className}`}
 >
   <ReplacerBox class={boxClass}>
-    {#snippet button(style: string, _: string)}
+    {#snippet button(style: string)}
       <FileInput class={style} {onFilesChanged} />
     {/snippet}
     {#snippet textarea(style: string)}
@@ -70,8 +70,8 @@
   </ReplacerBox>
 
   <ReplacerBox class={boxClass}>
-    {#snippet button(style: string, inactiveStyle: string)}
-      <FileOutput class={style} inactiveClass={inactiveStyle} data={output} />
+    {#snippet button(style: string)}
+      <FileOutput class={style} data={output} />
     {/snippet}
     {#snippet textarea(style: string)}
       <DiffDisplay class={style} data={output} />

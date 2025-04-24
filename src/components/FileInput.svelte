@@ -1,31 +1,43 @@
 <script lang="ts">
-	let files: FileList | undefined = $state();
+  import Button from "./atoms/Button.svelte";
 
-	let {
-		onFilesChanged,
-		class: className
-	}: {
-		onFilesChanged: (fileName: string, fileText: File) => void;
-		class?: string;
-	} = $props();
+  let files: FileList | undefined = $state();
 
-	const defaultLabelText = 'Select File...';
-	let labelText = $state(defaultLabelText);
+  let {
+    onFilesChanged,
+    class: className,
+  }: {
+    onFilesChanged: (fileName: string, fileText: File) => void;
+    class?: string;
+  } = $props();
 
-	/* is it better for this to be unchanging state or just generated every render? */
-	const idName = $state('finput' + (Math.random() * 10e15).toString(16));
+  const defaultLabelText = "Select File...";
+  let labelText = $state(defaultLabelText);
 
-	const onUpload = () => {
-		if (files === undefined || files.length === 0) {
-			return;
-		}
+  /* is it better for this to be unchanging state or just generated every render? */
+  const idName = $state("finput" + (Math.random() * 10e15).toString(16));
 
-		const f = files[0];
-		labelText = `File: ${f.name}`;
+  const onUpload = () => {
+    if (files === undefined || files.length === 0) {
+      return;
+    }
 
-		onFilesChanged(f.name, f);
-	};
+    const f = files[0];
+    labelText = `File: ${f.name}`;
+
+    onFilesChanged(f.name, f);
+  };
 </script>
 
-<label class={className} for={idName}>{labelText}</label>
-<input id={idName} type="file" bind:files onchange={onUpload} class="hidden" />
+<Button class={className}>
+  <label class="w-full h-full flex flex-col justify-center" for={idName}
+    >{labelText}</label
+  >
+  <input
+    id={idName}
+    type="file"
+    bind:files
+    onchange={onUpload}
+    class="hidden"
+  />
+</Button>
