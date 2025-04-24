@@ -33,6 +33,6 @@
   {#if showReplacerEditor}
     <ReplacerEditor class="grow-6 w-full" />
   {:else}
-    <ReplacerPanel class="grow-6 w-full"></ReplacerPanel>
+    <ReplacerPanel class="grow-6 w-full" />
   {/if}
 </div>
