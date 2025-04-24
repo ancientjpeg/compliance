@@ -7,15 +7,19 @@
     resetReplacer,
   } from "$lib/state/replacer.svelte";
 
+  import Button from "./atoms/Button.svelte";
+  import ReplacerBox from "./ReplacerBox.svelte";
+
   type Props = {
     class: string;
   };
 
   const { class: className }: Props = $props();
 
-  let replacerString: string = $state(
-    JSON.stringify(Object.fromEntries(replacer), null, 2),
-  );
+  const getReplacerString = () =>
+    JSON.stringify(Object.fromEntries(replacer), null, 2);
+
+  let replacerString: string = $state(getReplacerString());
 
   const validatedReplacer = $derived.by((): Replacer | null => {
     try {
@@ -25,26 +29,74 @@
   });
 
   const valid = $derived(validatedReplacer !== null);
-  const bg = $derived(valid ? "" : "bg-red-500");
+  const bg = $derived(valid ? "" : "bg-red-100");
+  const setterText = $derived(valid ? "set as replacer" : "cannot be parsed!");
+  const disabled = $derived(!valid);
 
-  const setAsReplacer = () => {
+  const onclick = () => {
     try {
       attemptReplacerUpdate(replacerString);
     } catch (e) {
-      console.error(`bad replacer json: ${e}`);
-      // resetReplacer();
+      console.error(
+        `state malfunction: should not attempt to parse bad replacer text! ${e}`,
+      );
+      throw e;
     }
+  };
+
+  const resetText = () => {
+    replacerString = getReplacerString();
+  };
+
+  const resetReplacerAndText = () => {
+    resetReplacer();
+    resetText();
   };
 </script>
 
-<div class={`${className} ${bg} flex flex-col`}>
-  <svelte:boundary>
-    <button class="basis-8" onclick={setAsReplacer}>Set as replacer</button>
-    <textarea bind:value={replacerString} class="w-full h-full"></textarea>
-    {#snippet failed(error, reset)}
-      <button class="basis-16" onclick={reset}>
-        Tried to set bad replacer JSON: {error}. Click here to reset.
-      </button>
-    {/snippet}
-  </svelte:boundary>
-</div>
+<ReplacerBox class={`${className} my-4 mx-4 `}>
+  {#snippet button(style: string)}
+    <div
+      id="button-row"
+      class={`basis-10 flex justify-around overflow-hidden ${style}`}
+    >
+      <Button
+        class="grow-1 border-r-2 border-black"
+        onclick={resetReplacerAndText}
+      >
+        reset replacer
+      </Button>
+      <Button class="grow-1 border-r-2 border-black" onclick={resetText}>
+        reset text
+      </Button>
+      <Button class="grow-1" {disabled} {onclick}>{setterText}</Button>
+    </div>
+  {/snippet}
+  {#snippet textarea(style: string)}
+    <textarea
+      bind:value={replacerString}
+      class={`w-full h-full resize-none ${bg} p-4`}
+    ></textarea>
+  {/snippet}
+</ReplacerBox>
+
+<!-- <div class={`${className} flex justify-center`}> -->
+<!--   <div class="flex flex-col gap-4 my-4 w-24 sm:w-xl md:w-2xl lg:w-3xl xl:w-5xl"> -->
+<!--     <div -->
+<!--       id="button-row" -->
+<!--       class="basis-10 flex justify-around border-black border-default rounded-default overflow-hidden" -->
+<!--     > -->
+<!--       <Button class="grow-1 border-r-2 border-black" onclick={resetReplacer}> -->
+<!--         Reset current replacer -->
+<!--       </Button> -->
+<!--       <Button class="grow-1 border-r-2 border-black" onclick={resetReplacer}> -->
+<!--         Reset text -->
+<!--       </Button> -->
+<!--       <Button class="grow-1" {onclick}>Set as replacer</Button> -->
+<!--     </div> -->
+<!--     <textarea -->
+<!--       bind:value={replacerString} -->
+<!--       class={`w-full h-full resize-none ${bg} border-black border-default rounded-default p-4`} -->
+<!--     ></textarea> -->
+<!--   </div> -->
+<!-- </div> -->

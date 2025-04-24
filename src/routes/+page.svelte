@@ -12,7 +12,7 @@
 <button
   onclick={toggleReplacerEditor}
   class="basis-4 border-default rounded-default hover:bg-gray-300 px-4 absolute right-0 top-.25"
-  >{showReplacerEditor ? "Hide" : "Show"} replacer editor</button
+  >{showReplacerEditor ? "hide" : "show"} replacer editor</button
 >
 <div
   class="grow-1 relative flex flex-col items-center justify-center m-4 sm:m-8 border-default rounded-default border-black box-border overflow-hidden"
@@ -31,9 +31,7 @@
     </a>.
   </p>
   {#if showReplacerEditor}
-    <ReplacerEditor
-      class="grow-6 border-black border-default rounded-default min-w-24 sm:min-w-96 w-96"
-    />
+    <ReplacerEditor class="grow-6 w-full" />
   {:else}
     <ReplacerPanel class="grow-6 w-full"></ReplacerPanel>
   {/if}
