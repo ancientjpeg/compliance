@@ -54,8 +54,8 @@
   };
 </script>
 
-<div class={`${className} flex justify-center`}>
-  <ReplacerBox class={`my-4 mx-4 w-4/5 sm:w-lg md:w-2xl lg:w-4xl xl:w-6xl`}>
+<div class={`${className} p-4 flex justify-center`}>
+  <ReplacerBox class={`w-4/5 sm:w-lg md:w-2xl lg:w-4xl xl:w-6xl`}>
     {#snippet button(style: string)}
       <div
         id="button-row"
