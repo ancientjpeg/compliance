@@ -54,31 +54,35 @@
   };
 </script>
 
-<ReplacerBox class={`${className} my-4 mx-4 `}>
-  {#snippet button(style: string)}
-    <div
-      id="button-row"
-      class={`basis-10 flex justify-around overflow-hidden ${style}`}
-    >
-      <Button
-        class="grow-1 border-r-2 border-black"
-        onclick={resetReplacerAndText}
+<div class={`${className} flex justify-center`}>
+  <ReplacerBox class={`my-4 mx-4 w-4/5 sm:w-lg md:w-2xl lg:w-4xl xl:w-6xl`}>
+    {#snippet button(style: string)}
+      <div
+        id="button-row"
+        class={`basis-14 
+        sm:basis-10 
+        flex justify-around overflow-hidden ${style}`}
       >
-        reset replacer
-      </Button>
-      <Button class="grow-1 border-r-2 border-black" onclick={resetText}>
-        reset text
-      </Button>
-      <Button class="grow-1" {disabled} {onclick}>{setterText}</Button>
-    </div>
-  {/snippet}
-  {#snippet textarea(style: string)}
-    <textarea
-      bind:value={replacerString}
-      class={`w-full h-full resize-none ${bg} p-4`}
-    ></textarea>
-  {/snippet}
-</ReplacerBox>
+        <Button
+          class="grow-1 border-r-2 border-black"
+          onclick={resetReplacerAndText}
+        >
+          reset replacer
+        </Button>
+        <Button class="grow-1 border-r-2 border-black" onclick={resetText}>
+          reset text
+        </Button>
+        <Button class="grow-1" {disabled} {onclick}>{setterText}</Button>
+      </div>
+    {/snippet}
+    {#snippet textarea(style: string)}
+      <textarea
+        bind:value={replacerString}
+        class={`w-full h-full resize-none ${bg} p-4`}
+      ></textarea>
+    {/snippet}
+  </ReplacerBox>
+</div>
 
 <!-- <div class={`${className} flex justify-center`}> -->
 <!--   <div class="flex flex-col gap-4 my-4 w-24 sm:w-xl md:w-2xl lg:w-3xl xl:w-5xl"> -->
