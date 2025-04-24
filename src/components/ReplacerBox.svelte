@@ -12,8 +12,6 @@
   let { button, textarea, class: className }: Props = $props();
 
   const buttonBaseStyle = "border-black border-b-2";
-  const buttonInactiveStyle = `${buttonBaseStyle} text-gray-400`;
-  const buttonActiveStyle = `${buttonBaseStyle} text-black active:bg-gray-400 hover:bg-gray-200`;
 </script>
 
 <div
