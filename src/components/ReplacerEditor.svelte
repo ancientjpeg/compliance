@@ -83,24 +83,3 @@
     {/snippet}
   </ReplacerBox>
 </div>
-
-<!-- <div class={`${className} flex justify-center`}> -->
-<!--   <div class="flex flex-col gap-4 my-4 w-24 sm:w-xl md:w-2xl lg:w-3xl xl:w-5xl"> -->
-<!--     <div -->
-<!--       id="button-row" -->
-<!--       class="basis-10 flex justify-around border-black border-default rounded-default overflow-hidden" -->
-<!--     > -->
-<!--       <Button class="grow-1 border-r-2 border-black" onclick={resetReplacer}> -->
-<!--         Reset current replacer -->
-<!--       </Button> -->
-<!--       <Button class="grow-1 border-r-2 border-black" onclick={resetReplacer}> -->
-<!--         Reset text -->
-<!--       </Button> -->
-<!--       <Button class="grow-1" {onclick}>Set as replacer</Button> -->
-<!--     </div> -->
-<!--     <textarea -->
-<!--       bind:value={replacerString} -->
-<!--       class={`w-full h-full resize-none ${bg} border-black border-default rounded-default p-4`} -->
-<!--     ></textarea> -->
-<!--   </div> -->
-<!-- </div> -->
