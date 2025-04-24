@@ -98,10 +98,7 @@
       >
         {errorText}
       </div>
-      <textarea
-        bind:value={replacerString}
-        class={`p-4 w-full h-full resize-none outline-none`}
-      ></textarea>
+      <textarea bind:value={replacerString} class={style}></textarea>
     {/snippet}
   </ReplacerBox>
 </div>

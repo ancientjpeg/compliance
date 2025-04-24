@@ -19,6 +19,6 @@
 >
   {@render button(buttonBaseStyle)}
   {@render textarea(
-    "grow-1 basis-0 overflow-scroll resize-none p-4 text-neutral-400 enabled:text-black",
+    "grow-1 basis-0 overflow-scroll resize-none p-4 text-neutral-400 enabled:text-black outline-none",
   )}
 </div>
