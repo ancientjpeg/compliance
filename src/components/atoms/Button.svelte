@@ -3,7 +3,7 @@
 
   type Props = {
     children?: Snippet;
-    onclick: () => void;
+    onclick?: () => void;
     class?: string;
     disabled?: boolean;
   };

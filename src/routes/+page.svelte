@@ -2,7 +2,7 @@
   import ReplacerPanel from "$components/ReplacerPanel.svelte";
   import ReplacerEditor from "$components/ReplacerEditor.svelte";
 
-  let showReplacerEditor = $state(true);
+  let showReplacerEditor = $state(false);
 
   const toggleReplacerEditor = () => {
     showReplacerEditor = !showReplacerEditor;
