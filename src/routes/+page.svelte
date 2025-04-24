@@ -11,11 +11,15 @@
 </script>
 
 <div
-  class="grow-1 absolute inset-4 sm:inset-8 flex flex-col items-center justify-center border-default rounded-default border-black box-border overflow-hidden"
+  class="absolute inset-4 sm:inset-8
+  flex flex-col items-center justify-center
+  border-default rounded-default border-black
+  box-border overflow-hidden"
 >
   <Button
     onclick={toggleReplacerEditor}
-    class="border-b-2 sm:border-l-2 sm:rounded-bl-default px-4 absolute block right-0 top-0 min-w-full sm:min-w-3xs h-8"
+    class="border-b-2 sm:border-l-2 sm:rounded-bl-default 
+    px-4 self-stretch sm:self-end sm:w-3xs "
   >
     {showReplacerEditor ? "hide" : "show"} replacer editor
   </Button>
