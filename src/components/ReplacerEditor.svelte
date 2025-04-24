@@ -5,6 +5,7 @@
     createReplacerFromText,
     replacer,
     resetReplacer,
+    ReplacerSyntaxError,
   } from "$lib/state/replacer.svelte";
 
   import Button from "./atoms/Button.svelte";
@@ -21,16 +22,33 @@
 
   let replacerString: string = $state(getReplacerString());
 
-  const validatedReplacer = $derived.by((): Replacer | null => {
-    try {
-      return createReplacerFromText(replacerString);
-    } catch {}
-    return null;
-  });
+  const validatedReplacer: Replacer | Error = $derived.by(
+    (): Replacer | Error => {
+      try {
+        return createReplacerFromText(replacerString);
+      } catch (e) {
+        if (e instanceof Error) {
+          return e;
+        }
+        throw new Error("Got unexpected throw from createReplacerFromText");
+      }
+    },
+  );
 
-  const valid = $derived(validatedReplacer !== null);
+  const textForError = (e: Error) => {
+    if (e instanceof ReplacerSyntaxError) {
+      return `duplicate: ${e.key}:[${e.valueKey}:${e.value}]`;
+    } else if (e instanceof SyntaxError) {
+      return "JSON parse failed";
+    }
+    return "unknown error!";
+  };
+
+  const valid = $derived(!(validatedReplacer instanceof Error));
   const bg = $derived(valid ? "" : "bg-red-100");
-  const setterText = $derived(valid ? "set as replacer" : "cannot be parsed!");
+  const errorText = $derived(
+    valid ? "replacer valid!" : textForError(validatedReplacer as Error),
+  );
   const disabled = $derived(!valid);
 
   const onclick = () => {
@@ -59,8 +77,7 @@
     {#snippet button(style: string)}
       <div
         id="button-row"
-        class={`basis-14 
-        sm:basis-10 
+        class={`basis-10 
         flex justify-around overflow-hidden ${style}`}
       >
         <Button
@@ -72,13 +89,18 @@
         <Button class="grow-1 border-r-2 border-black" onclick={resetText}>
           reset text
         </Button>
-        <Button class="grow-1" {disabled} {onclick}>{setterText}</Button>
+        <Button class="grow-1" {disabled} {onclick}>set replacer</Button>
       </div>
     {/snippet}
     {#snippet textarea(style: string)}
+      <div
+        class={`basis-10 grow-0 border-b-2 border-black flex items-center justify-center ${bg}`}
+      >
+        {errorText}
+      </div>
       <textarea
         bind:value={replacerString}
-        class={`w-full h-full resize-none ${bg} p-4`}
+        class={`p-4 w-full h-full resize-none`}
       ></textarea>
     {/snippet}
   </ReplacerBox>
